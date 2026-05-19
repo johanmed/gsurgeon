@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import asyncio
 import os
 
@@ -55,14 +57,11 @@ elif MODEL_TYPE == 1:
 else:
     raise ValueError("MODEL_TYPE must be 0 or 1")
 
-
 dspy.configure(lm=model)
-
 
 async def main(query: str) -> str:
     surgeon = GSurgeon()
     return await surgeon.handler(query)
-
 
 if __name__ == "__main__":
     asyncio.run(main(QUERY))
