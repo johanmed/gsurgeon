@@ -1,83 +1,87 @@
+"""Modules with tools for multi-agent system"""
+
 from Bio import Entrez
 from Bio.Entrez import efetch, esearch, esummary, read
 from langchain_core.messages import BaseMessage
 
-# Specialized modules for researcher
-
-
-class Naturalize(dspy.Signature):
-    text: list[BaseMessage] = dspy.InputField()
-    answer: str = dspy.OutputField(desc="Natural English sentence")
-
-
-naturalize_pred = dspy.Predict(Naturalize)
-
-
-class Rephrase(dspy.Signature):
-    input_text: list[BaseMessage] = dspy.InputField()
-    existing_history: list[BaseMessage] = dspy.InputField()
-    answer: str = dspy.OutputField(desc="Reformulated query")
-
-
-rephrase_pred = dspy.Predict(Rephrase)
-
-
-class Analyze(dspy.Signature):
-    context: list[BaseMessage] = dspy.InputField()
-    existing_history: list[BaseMessage] = dspy.InputField()
-    input_text: list[BaseMessage] = dspy.InputField()
-    answer: str = dspy.OutputField(desc="Analysis (≤200 words)")
-
-
-analyze_pred = dspy.Predict(Analyze)
-
-
-class Check(dspy.Signature):
-    answer: list[BaseMessage] = dspy.InputField()
-    input_text: list[BaseMessage] = dspy.InputField()
-    decision: str = dspy.OutputField(desc='"yes" or "no"')
-
-
-check_pred = dspy.Predict(Check)
-
-
-class Summarize(dspy.Signature):
-    full_context: list[BaseMessage] = dspy.InputField()
-    summary: str = dspy.OutputField(desc="Bullet-point summary")
-
-
-summarize_pred = dspy.Predict(Summarize)
-
-
-class Synthesize(dspy.Signature):
-    input_text: list[BaseMessage] = dspy.InputField()
-    updated_history: list[BaseMessage] = dspy.InputField()
-    conclusion: str = dspy.OutputField(desc="Final paragraph")
-
-
-synthesize_pred = dspy.Predict(Synthesize)
-
 
 class Subquery(dspy.Signature):
-    query: list[BaseMessage] = dspy.InputField()
+    query: str = dspy.InputField()
     answer: list[str] = dspy.OutputField(desc="The list of smaller tasks")
 
+def split_query(query: str) -> list[str]:
+    """Split query into multiple atomic subqueries easier to handle for better satisfaction"""
+    subquery = dspy.Predict(Subquery)
+    return subquery(query=query).get("answer")
 
-subquery = dspy.Predict(Subquery)
+splitter = dspy.Tool(
+    name="splitter",
+    desc="Process a query by splitting into atomic subqueries for efficiency",
+    args={
+        "query": {
+            "type": "string",
+            "desc": "Query to process",
+        },
+    },
+    func=split_query,
+)
 
+class Check(dspy.Signature):
+    """Check if info is relevant to query"""
+    query: str = dspy.InputField()
+    info: str = dspy.InputField()
+    decision: str = dspy.OutputField(desc="Say 'yes' or 'no'")
 
-class Finalize(dspy.Signature):
-    query: list[BaseMessage] = dspy.InputField()
-    subqueries: list[BaseMessage] = dspy.InputField()
-    answers: list[BaseMessage] = dspy.InputField()
-    conclusion: str = dspy.OutputField(desc="Final answer")
+def check_relevance(query: str, info: str) -> str:
+    check = dspy.Predict(Check)
+    return check(query=query, info=info).get("decision")
 
+checker = dspy.Tool(
+    name="checker",
+    desc="Check if information previously extracted is relevant for the query",
+    args={
+        "query": {
+            "type": "string",
+            "desc": "Query to address",
+        },
+        "info": {
+            "type": "string",
+            "desc": "Information extracted in attempt to provide answer to query",
+        },
+    },
+    func=check_relevance,
+)
 
-finalize_pred = dspy.Predict(Finalize)
+class Rephrase(dspy.Signature):
+    """Reformulate query given target and context accumulated so far"""
+    query: str = dspy.InputField()
+    target: str = dspy.InputField()
+    background: str = dspy.InputField()
+    reformulation: str = dspy.OutputField(desc="Reformulated query")
 
+def rephrase_query(query: str, target: str, background: str) -> str:
+    rephrase = dspy.Predict(Rephrase)
+    return rephrase(query=query, target=target, background=background).get("reformulation")
 
-# Specialized ReAct architecture for expert
-
+reformulator = dspy.Tool(
+    name="reformulator",
+    desc="Reformulate the query to be next processed in light of the context accumulated so far (background) and the target",
+    args={
+        "query": {
+            "type": "string",
+            "desc": "Query to be reformulated",
+        },
+        "target": {
+            "type": "string",
+            "desc": "Original query or target",
+        },
+        "background": {
+            "type": "string",
+            "desc": "Accumulated context in effort to achieve the target",
+        },
+    },
+    func=rephrase_query,
+)
 
 def search_ncbi(database: str, term: str, max_results: int = 10) -> Any:
     handle = esearch(db=database, term=term, retmax=max_results)
@@ -85,9 +89,8 @@ def search_ncbi(database: str, term: str, max_results: int = 10) -> Any:
     handle.close()
     return records
 
-
-search_ncbi = dspy.Tool(
-    name="search_ncbi",
+ncbi_searcher = dspy.Tool(
+    name="ncbi_searcher",
     desc="Search an NCBI database (e.g., nucleotide, protein, pubmed) for a term",
     args={
         "database": {
@@ -111,9 +114,8 @@ def fetch_record(database: str, record_id: str, rettype: str) -> str:
     handle.close()
     return result
 
-
-fetch_record = dspy.Tool(
-    name="fetch_record",
+record_fetcher = dspy.Tool(
+    name="record_fetcher",
     desc="Fetch a record from an NCBI database (e.g., nucleotide, protein, pubmed)",
     args={
         "database": {
@@ -133,9 +135,8 @@ def summarize_record(database: str, record_id: str) -> Any:
     handle.close()
     return result
 
-
-summarize_record = dspy.Tool(
-    name="summarize_record",
+record_synthesizer = dspy.Tool(
+    name="record_synthesiser",
     desc="Get summary on a record from an NCBI database (e.g., nucleotide, protein, pubmed)",
     args={
         "database": {
@@ -150,7 +151,7 @@ summarize_record = dspy.Tool(
 
 class ReactSig(dspy.Signature):
     query: list[BaseMessage] = dspy.InputField()
-    solution: str = dspy.OutputField(desc="The answer to the query")
+    solution: str = dspy.OutputField(desc="The final answer to the query")
 
 
 class React(dspy.Module):
@@ -167,18 +168,13 @@ class React(dspy.Module):
     def forward(self, query: list[BaseMessage]):
         return self.react(query=query)
 
-
 class Plan(dspy.Signature):
     background: list[BaseMessage] = dspy.InputField()
     answer: str = dspy.OutputField(desc="The plan to solve the task")
     reasoning: str = dspy.OutputField(
         desc="Concise explanation of the output in 50 words"
     )
-
-
-# Module to make plan
 plan = dspy.Predict(Plan)
-
 
 class Tune(dspy.Signature):
     background: list[BaseMessage] = dspy.InputField()
@@ -186,11 +182,7 @@ class Tune(dspy.Signature):
     reasoning: str = dspy.OutputField(
         desc="Concise explanation of the output in 50 words"
     )
-
-
-# Module to tune reflection
 tune = dspy.Predict(Tune)
-
 
 class Decide(dspy.Signature):
     background: list[BaseMessage] = dspy.InputField()
@@ -200,21 +192,14 @@ class Decide(dspy.Signature):
     reasoning: str = dspy.OutputField(
         desc="Concise explanation of the decision in 50 words"
     )
-
-
-# Module to manage system
 supervise = dspy.Predict(Decide)
 
-
-class End(dspy.Signature):
+class Finalize(dspy.Signature):
     messages: list[BaseMessage] = dspy.InputField()
     feedback: str = dspy.OutputField(
         desc="Detailed and comprehensive final feedback combining AI outputs in the list of messages and linking them when necessary"
     )
-
-
-# Module to wrap up
-end = dspy.Predict(End)
+finalize = dspy.Predict(Finalize)
 
 class AgentState(BaseModel):
     """
@@ -224,16 +209,3 @@ class AgentState(BaseModel):
 
     messages: Annotated[list[BaseMessage], add_messages]
     next_decision: Literal["researcher", "planner", "reflector", "expert", "end"]
-
-
-class ResearcherState(TypedDict):
-    """
-    Represents state of the agent researcher
-    Avails 05 attributes to allow communication between its subcomponents
-    """
-
-    input_text: str
-    chat_history: list[str]
-    context: list[str]
-    answer: str
-    should_continue: str

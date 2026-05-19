@@ -26,7 +26,7 @@ from prompts import *
 warnings.filterwarnings("ignore")
 
 @dataclass
-class Search:
+class AgentSystem:
     """
     Represent Search Agent
     Input:
@@ -36,127 +36,6 @@ class Search:
         Run of query through system
     """
     max_iterations: int = 10
-    resgraph: Any = field(init=False)
-
-    def __post_init__(self):
-        self.resgraph = self.initialize_resgraph()
-
-    def split_query(self, query: str) -> list[str]:
-        # Split query in researcher
-        logging.info("Splitting query")
-
-        split_prompt = [self.split_prompt, HumanMessage(query)]
-        result = subquery(query=split_prompt)
-
-        logging.info(f"Subqueries in split_query: {result}")
-        result = result.get("answer")
-
-        return result
-
-    def analyze(self, state: ResearcherState) -> dict:
-        """Addresses a query based on retrieved documents in researcher
-
-        Args:
-            state: researcher state
-
-        Returns:
-            researcher state updated with answer
-        """
-
-        logging.info("Analysing")
-
-        context = (
-            "\n".join(doc.page_content for doc in state.get("context", []))
-            if state.get("context", [])
-            else ""
-        )
-
-        truncated_context = str(context)[
-            :25_000
-        ]  # prehandle context length of large documents given model limit of 32_000
-
-        existing_history = (
-            "\n".join(state.get("chat_history", []))
-            if state.get("chat_history", [])
-            else ""
-        )
-
-        analyze_prompt = [self.analyze_prompt, HumanMessage(state["input_text"])]
-
-        response = analyze_pred(
-            input_text=analyze_prompt,
-            context=[HumanMessage(truncated_context)],
-            existing_history=[HumanMessage(existing_history)],
-        )
-
-        logging.info(f"Response in analyze: {response}")
-
-        response = response.get("answer")
-        should_continue = "check_relevance"
-
-        return {
-            "input_text": state["input_text"],
-            "answer": response,
-            "should_continue": should_continue,
-            "context": state.get("context", []),
-            "chat_history": state.get("chat_history", []),
-        }
-
-    def check_relevance(self, state: ResearcherState) -> dict:
-        """Checks relevance of answer to query in researcher
-
-        Args:
-            state: researcher state
-
-        Returns:
-            researcher state updated with relevance status
-        """
-
-        logging.info("Checking relevance")
-
-        answer = state["answer"]
-
-        check_prompt = [self.check_prompt, HumanMessage(state["input_text"])]
-
-        assessment = check_pred(input_text=check_prompt, answer=[HumanMessage(answer)])
-        logging.info(f"Assessment in checking relevance: {assessment}")
-
-        if assessment.get("decision") == "yes":
-            should_continue = "summarize"
-        else:
-            should_continue = "end"
-            answer = "Sorry, we are unable to \
-                provide a valuable feedback due to lack of relevant data."
-
-        return {
-            "input_text": state["input_text"],
-            "context": state.get("context", []),
-            "answer": answer,
-            "chat_history": state.get("chat_history", []),
-            "should_continue": should_continue,
-        }
-
-
-    def initialize_resgraph(self) -> Any:
-        graph_builder = StateGraph(ResearcherState)
-        graph_builder.add_node("rephrase", self.rephrase)
-        graph_builder.add_node("retrieve", self.retrieve)
-        graph_builder.add_node("check_relevance", self.check_relevance)
-        graph_builder.add_node("analyze", self.analyze)
-        graph_builder.add_node("summarize", self.summarize)
-        graph_builder.add_edge(START, "rephrase")
-        graph_builder.add_edge("rephrase", "retrieve")
-        graph_builder.add_edge("retrieve", "analyze")
-        graph_builder.add_edge("analyze", "check_relevance")
-        graph_builder.add_edge("summarize", END)
-        graph_builder.add_conditional_edges(
-            "check_relevance",
-            lambda state: state.get("should_continue", "summarize"),
-            {"summarize": "summarize", "end": END},
-        )
-        resgraph = graph_builder.compile(checkpointer=self.memory)
-
-        return resgraph
 
     def researcher(self, state: AgentState) -> dict:
         """Researches a query
