@@ -20,8 +20,8 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from pydantic import BaseModel
 from typing_extensions import Annotated, TypedDict
 
-from config import *
-from prompts import *
+from tools import Consult, Research, Plan, Tune, Supervise, Finalize, AgentState
+from prompts import supervisor_prompt1, supervisor_prompt2, reflector_prompt, planner_prompt, expert_prompt, researcher_prompt
 
 warnings.filterwarnings("ignore")
 
@@ -108,6 +108,7 @@ class AgentSystem:
             agent state updated with plan
         """
 
+        plan = dspy.Predict(Plan)
         logging.info("Planning")
         input_text = [self.plan_prompt] + state.messages
         logging.info(f"Input in planner: {input_text}")
@@ -128,7 +129,7 @@ class AgentSystem:
         Returns:
             agent state updated with suggestions
         """
-
+        tune = dspy.Predict(Tune)
         logging.info("Reflecting")
         trans_map = {AIMessage: HumanMessage, HumanMessage: AIMessage}
         translated_messages = [self.refl_prompt, state.messages[0]] + [
@@ -156,7 +157,7 @@ class AgentSystem:
         Returns:
             agent state updated with next agent to call
         """
-
+        supervise = dspy.Predict(Supervise)
         logging.info("Supervising")
         messages = [
             ("system", self.sup_prompt1),
@@ -215,6 +216,7 @@ class AgentSystem:
         Main question handler of the system
         """
         global_result = await self.invoke_globgraph(query)
+        finalize = dspy.Predict(Finalize)
         end_prompt = global_result.get("messages")
         end_result = end(messages=end_prompt)
         end_result = end_result.get("feedback")

@@ -392,8 +392,6 @@ class Plan(dspy.Signature):
         desc="Concise explanation of the output in 50 words"
     )
 
-plan = dspy.Predict(Plan)
-
 class Tune(dspy.Signature):
     background: list[BaseMessage] = dspy.InputField()
     answer: str = dspy.OutputField(desc="The new questions")
@@ -401,9 +399,7 @@ class Tune(dspy.Signature):
         desc="Concise explanation of the output in 50 words"
     )
 
-tune = dspy.Predict(Tune)
-
-class Decide(dspy.Signature):
+class Supervise(dspy.Signature):
     background: list[BaseMessage] = dspy.InputField()
     next_decision: Literal["researcher", "reflector", "expert", "end"] = (
         dspy.OutputField(desc="The next step to take based on instructions")
@@ -412,15 +408,11 @@ class Decide(dspy.Signature):
         desc="Concise explanation of the decision in 50 words"
     )
 
-supervise = dspy.Predict(Decide)
-
 class Finalize(dspy.Signature):
     messages: list[BaseMessage] = dspy.InputField()
     feedback: str = dspy.OutputField(
         desc="Detailed and comprehensive final feedback combining AI outputs in the list of messages and linking them when necessary"
     )
-
-finalize = dspy.Predict(Finalize)
 
 class AgentState(BaseModel):
     """
