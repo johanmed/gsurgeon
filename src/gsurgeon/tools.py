@@ -5,14 +5,14 @@ from Bio.Entrez import efetch, esearch, esummary, read
 from langchain_core.messages import BaseMessage
 
 
-class Subquery(dspy.Signature):
+class Split(dspy.Signature):
     query: str = dspy.InputField()
     answer: list[str] = dspy.OutputField(desc="The list of smaller tasks")
 
 def split_query(query: str) -> list[str]:
     """Split query into multiple atomic subqueries easier to handle for better satisfaction"""
-    subquery = dspy.Predict(Subquery)
-    return subquery(query=query).get("answer")
+    split = dspy.Predict(Split)
+    return split(query=query).get("answer")
 
 splitter = dspy.Tool(
     name="splitter",
@@ -154,15 +154,29 @@ class ReactSig(dspy.Signature):
     solution: str = dspy.OutputField(desc="The final answer to the query")
 
 
-class React(dspy.Module):
+class Research(dspy.Module):
     def __init__(self):
         super().__init__()
-        self.tools = [search_ncbi, fetch_record, summarize_record]
+        self.tools = [splitter, checker, reformulator]
 
         self.react = dspy.ReAct(
             signature=ReactSig,
             tools=self.tools,
             max_iters=50,  # maximum number of steps for reasoning and tool calling
+        )
+
+    def forward(self, query: list[BaseMessage]):
+        return self.react(query=query)
+
+class Consult(dspy.Module):
+    def __init__(self):
+        super().__init__()
+        self.tools = [splitter, checker, reformulator, ncbi_searcher, record_fetcher, record_synthesizer]
+
+        self.react = dspy.ReAct(
+            signature=ReactSig,
+            tools=self.tools,
+            max_iters=50,
         )
 
     def forward(self, query: list[BaseMessage]):
