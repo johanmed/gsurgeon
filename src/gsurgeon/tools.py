@@ -386,6 +386,7 @@ class Consult(dspy.Module):
         return self.react(query=query)
 
 class Plan(dspy.Signature):
+    """Generate plan to solve query in background"""
     background: list[BaseMessage] = dspy.InputField()
     answer: str = dspy.OutputField(desc="The plan to solve the task")
     reasoning: str = dspy.OutputField(
@@ -393,6 +394,7 @@ class Plan(dspy.Signature):
     )
 
 class Tune(dspy.Signature):
+    """Make recommendations to improve user satisfaction to answer generated so far to query"""
     background: list[BaseMessage] = dspy.InputField()
     answer: str = dspy.OutputField(desc="The new questions")
     reasoning: str = dspy.OutputField(
@@ -400,6 +402,7 @@ class Tune(dspy.Signature):
     )
 
 class Supervise(dspy.Signature):
+    """Guide the next action the system should take"""
     background: list[BaseMessage] = dspy.InputField()
     next_decision: Literal["researcher", "reflector", "expert", "end"] = (
         dspy.OutputField(desc="The next step to take based on instructions")
@@ -409,6 +412,7 @@ class Supervise(dspy.Signature):
     )
 
 class Finalize(dspy.Signature):
+    """Build the synthesis to send back to the user"""
     messages: list[BaseMessage] = dspy.InputField()
     feedback: str = dspy.OutputField(
         desc="Detailed and comprehensive final feedback combining AI outputs in the list of messages and linking them when necessary"
@@ -416,8 +420,8 @@ class Finalize(dspy.Signature):
 
 class AgentState(BaseModel):
     """
-    Represents agent state
-    Avails 02 attributes to allow communication between agents
+    Represent agent state
+    Avail 02 attributes to allow communication between agents
     """
 
     messages: Annotated[list[BaseMessage], add_messages]

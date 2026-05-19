@@ -37,152 +37,70 @@ class AgentSystem:
     """
     max_iterations: int = 10
 
-    def researcher(self, state: AgentState) -> dict:
-        """Researches a query
-
-        Args:
-            state: agent state containing query
-
-        Returns:
-            agent state updated with result
-        """
-
-        logging.info("Researching")
+    def _researcher(self, state: AgentState) -> dict:
         if len(state.messages) < 3:  # handle first call to researcher
             input_text = state.messages[0]  # use original query
         else:
             input_text = state.messages[-1]  # use reflection insights
-        input_text = input_text.content
-        logging.info(f"Input in researcher: {input_text}")
-        result = self.manage_subtasks(input_text)
-        logging.info(f"Result in researcher: {result}")
-
+        input_text = [researcher_prompt, input_text.content]
+        research = Research()
+        result = research(query=input_text)
         return {
-            "messages": [result],
+            "messages": [result.get("solution")],
         }
 
-    def expert(self, state: AgentState) -> dict:
-        """Addresses a query using own model thinking and search tool through ReAct
-
-        Args:
-            state: agent state containing query
-
-        Returns:
-            agent state updated with answer
-        """
-
-        logging.info("Expert extracting knowledge")
+    def _expert(self, state: AgentState) -> dict:
         if len(state.messages) < 4:  # handle first call to expert
             input_text = state.messages[1] + state.messages[0] # use plan and query
         else:
             input_text = state.messages[-2]  # use reflection insights
-
-        input_text = [self.expert_prompt, input_text]
-        logging.info(f"Input in expert: {input_text}")
-
-        react = React()
-        result = react(query=input_text)
-
-        logging.info(f"Result from expert: {result}")
-        answer = result.get("solution")
-
-        # Save information in database for reuse later by researcher
-        metadata = {"source": f"New Document {self.ext_db._collection.count() + 1}"}
-        self.ext_db.add_texts(
-            texts=[answer],
-            metadatas=[metadata],
-        )
-        self.ext_db.persist()
-
+        input_text = [expert_prompt, input_text]
+        consult = Consult()
+        result = consult(query=input_text)
         return {
-            "messages": [answer],
+            "messages": [result.get("solution")],
         }
 
-    def planner(self, state: AgentState) -> dict:
-        """Plans steps to tackle a problem
-
-        Args:
-            state: agent state specifying problem
-
-        Returns:
-            agent state updated with plan
-        """
-
+    def _planner(self, state: AgentState) -> dict:
         plan = dspy.Predict(Plan)
-        logging.info("Planning")
-        input_text = [self.plan_prompt] + state.messages
-        logging.info(f"Input in planner: {input_text}")
+        input_text = [planner_prompt] + state.messages
         result = plan(background=input_text)
-        logging.info(f"Result in planner: {result}")
-        answer = result.get("answer")
-
         return {
-            "messages": [answer],
+            "messages": [result.get("answer")],
         }
 
     def reflector(self, state: AgentState) -> dict:
-        """Reflects about progress
-
-        Args:
-            state: agent state with current progress
-
-        Returns:
-            agent state updated with suggestions
-        """
         tune = dspy.Predict(Tune)
-        logging.info("Reflecting")
         trans_map = {AIMessage: HumanMessage, HumanMessage: AIMessage}
-        translated_messages = [self.refl_prompt, state.messages[0]] + [
+        translated_messages = [refl_prompt, state.messages[0]] + [
             trans_map[msg.__class__](content=msg.content) for msg in state.messages[1:]
         ]
-        logging.info(f"Input in reflector: {translated_messages}")
         result = tune(background=translated_messages)
-        logging.info(f"Result in reflector: {result}")
-        answer = result.get("answer")
-        answer = (
-            "Progress has been made. Use now all the resources to addess this new suggestion: "
-            + answer
-        )
-
         return {
-            "messages": [HumanMessage(answer)],
+            "messages": [HumanMessage(f"Progress has been made. Use now all the resources to addess this new suggestion: {result.get('answer')}")],
         }
 
-    def supervisor(self, state: AgentState) -> dict:
-        """Manages interactions between other agents in system
-
-        Args:
-            state: agent state with relevant data
-
-        Returns:
-            agent state updated with next agent to call
-        """
+    def _supervisor(self, state: AgentState) -> dict:
         supervise = dspy.Predict(Supervise)
-        logging.info("Supervising")
         messages = [
             ("system", self.sup_prompt1),
             *state.messages,
             ("system", self.sup_prompt2),
         ]
-
         if len(messages) > self.max_iterations:
             return {"next_decision": "end"}
-
         result = supervise(background=messages)
-        logging.info(f"Result in supervisor: {result}")
-        next_decision = result.get("next_decision")
-
         return {
-            "next_decision": next_decision,
+            "next_decision": result.get("next_decision"),
         }
 
-    def initialize_globgraph(self) -> Any:
+    async def _run_graph(self, query: str) -> Any:
         graph_builder = StateGraph(AgentState)
-        graph_builder.add_node("researcher", self.researcher)
-        graph_builder.add_node("planner", self.planner)
-        graph_builder.add_node("reflector", self.reflector)
-        graph_builder.add_node("supervisor", self.supervisor)
-        graph_builder.add_node("expert", self.expert)
+        graph_builder.add_node("researcher", self._researcher)
+        graph_builder.add_node("planner", self._planner)
+        graph_builder.add_node("reflector", self._reflector)
+        graph_builder.add_node("supervisor", self._supervisor)
+        graph_builder.add_node("expert", self._expert)
         graph_builder.add_edge(START, "planner")
         graph_builder.add_edge("researcher", "supervisor")
         graph_builder.add_edge("expert", "supervisor")
@@ -199,11 +117,6 @@ class AgentSystem:
             },
         )
         graph = graph_builder.compile()
-
-        return graph
-
-    async def invoke_globgraph(self, query: str) -> Any:
-        graph = self.initialize_globgraph()
         initial_state = {
             "messages": [("human", query)],
             "next_decision": "planner",  # always plan first
@@ -211,23 +124,15 @@ class AgentSystem:
         result = await graph.ainvoke(initial_state)
         return result
 
-    async def handler(self, query: str) -> str:
-        """
-        Main question handler of the system
-        """
-        global_result = await self.invoke_globgraph(query)
-        finalize = dspy.Predict(Finalize)
-        end_prompt = global_result.get("messages")
-        end_result = end(messages=end_prompt)
-        end_result = end_result.get("feedback")
-
-        first_result = global_result.get("messages")[
+    async def handle(self, query: str) -> str:
+        result = await self._run_graph(query)
+        first_result = result.get("messages")[
             2
         ].content  # get first researcher feedback
-        second_result = global_result.get("messages")[
+        second_result = result.get("messages")[
             3
         ].content  # get first expert feedback
-
-        output = f"\nInternal feedback: {first_result}\n\nExternal feedback: {second_result}\n\nProcessed feedback: {end_result}"
-
+        finalize = dspy.Predict(Finalize)
+        final_result = finalize(messages=result.get("messages")).get("feedback")
+        output = f"\nInternal feedback: {first_result}\nExternal feedback: {second_result}\nProcessed feedback: {final_result}"
         return output
