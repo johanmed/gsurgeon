@@ -26,7 +26,7 @@ from prompts import supervisor_prompt1, supervisor_prompt2, reflector_prompt, pl
 warnings.filterwarnings("ignore")
 
 @dataclass
-class AgentSystem:
+class GSurgeon:
     """
     Represent Search Agent
     Input:
