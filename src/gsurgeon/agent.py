@@ -2,7 +2,7 @@
 Multi-agent system to dissect genomic information
 Main module of the package
 Author: Johannes Medagbe
-Copyright (c) 2025
+Copyright (c) 2026
 """
 
 import json
@@ -10,15 +10,13 @@ import logging
 import os
 import time
 import warnings
-from dataclasses import dataclass, field
-from typing import Any, Literal
+from dataclasses import dataclass
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
-from pydantic import BaseModel
-from typing_extensions import Annotated, TypedDict
 
 from prompts import (
     expert_prompt,
@@ -117,8 +115,6 @@ class GSurgeon:
         graph_builder.add_edge(START, "planner")
         graph_builder.add_edge("researcher", "supervisor")
         graph_builder.add_edge("expert", "supervisor")
-        graph_builder.add_edge("planner", "researcher")
-        graph_builder.add_edge("reflector", "researcher")
         graph_builder.add_conditional_edges(
             "supervisor",
             lambda state: state.next_decision,

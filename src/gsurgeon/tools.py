@@ -7,6 +7,8 @@ import httpx
 from Bio import Entrez
 from Bio.Entrez import efetch, esearch, esummary, read
 from langchain_core.messages import BaseMessage
+from pydantic import BaseModel
+from typing_extensions import Annotated
 
 
 class Split(dspy.Signature):
@@ -389,6 +391,8 @@ class ReactSig(dspy.Signature):
 
 
 class Research(dspy.Module):
+    """Address a query or plan to completion using GeneNetwork resources only"""
+
     def __init__(self):
         super().__init__()
         fetcher = make_sparql_tool("http://sparql.genenetwork.org/sparql")
@@ -405,6 +409,8 @@ class Research(dspy.Module):
 
 
 class Consult(dspy.Module):
+    """Address a query or plan to completion using NCBI resources only"""
+
     def __init__(self):
         super().__init__()
         self.tools = [
@@ -447,7 +453,12 @@ class Tune(dspy.Signature):
 
 
 class Supervise(dspy.Signature):
-    """Guide the next action the system should take"""
+    """
+    Decide the next action the system should take.
+    To select the next step, you must take into account the query and the curent context.
+    If the query is not related to GeneNetwork traits, do not call the researcher. The expert should be the main actor.
+    Similarly, do not call the expert if the query is GeneNetwork specific.
+    """
 
     background: list[BaseMessage] = dspy.InputField()
     next_decision: Literal["researcher", "reflector", "expert", "end"] = (
