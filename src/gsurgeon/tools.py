@@ -2,6 +2,7 @@
 
 import asyncio
 import concurrent.futures
+
 import httpx
 from Bio import Entrez
 from Bio.Entrez import efetch, esearch, esummary, read
@@ -12,10 +13,12 @@ class Split(dspy.Signature):
     query: str = dspy.InputField()
     answer: list[str] = dspy.OutputField(desc="The list of smaller tasks")
 
+
 def split_query(query: str) -> list[str]:
     """Split query into multiple atomic subqueries easier to handle for better satisfaction"""
     split = dspy.Predict(Split)
     return split(query=query).get("answer")
+
 
 splitter = dspy.Tool(
     name="splitter",
@@ -29,15 +32,19 @@ splitter = dspy.Tool(
     func=split_query,
 )
 
+
 class Check(dspy.Signature):
     """Check if info is relevant to query"""
+
     query: str = dspy.InputField()
     info: str = dspy.InputField()
     decision: str = dspy.OutputField(desc="Say 'yes' or 'no'")
 
+
 def check_relevance(query: str, info: str) -> str:
     check = dspy.Predict(Check)
     return check(query=query, info=info).get("decision")
+
 
 checker = dspy.Tool(
     name="checker",
@@ -55,16 +62,22 @@ checker = dspy.Tool(
     func=check_relevance,
 )
 
+
 class Rephrase(dspy.Signature):
     """Reformulate query given target and context accumulated so far"""
+
     query: str = dspy.InputField()
     target: str = dspy.InputField()
     background: str = dspy.InputField()
     reformulation: str = dspy.OutputField(desc="Reformulated query")
 
+
 def rephrase_query(query: str, target: str, background: str) -> str:
     rephrase = dspy.Predict(Rephrase)
-    return rephrase(query=query, target=target, background=background).get("reformulation")
+    return rephrase(query=query, target=target, background=background).get(
+        "reformulation"
+    )
+
 
 reformulator = dspy.Tool(
     name="reformulator",
@@ -86,11 +99,13 @@ reformulator = dspy.Tool(
     func=rephrase_query,
 )
 
+
 def search_ncbi(database: str, term: str, max_results: int = 10) -> Any:
     handle = esearch(db=database, term=term, retmax=max_results)
     records = read(handle)
     handle.close()
     return records
+
 
 ncbi_searcher = dspy.Tool(
     name="ncbi_searcher",
@@ -117,6 +132,7 @@ def fetch_record(database: str, record_id: str, rettype: str) -> str:
     handle.close()
     return result
 
+
 record_fetcher = dspy.Tool(
     name="record_fetcher",
     desc="Fetch a record from an NCBI database (e.g., nucleotide, protein, pubmed)",
@@ -138,6 +154,7 @@ def summarize_record(database: str, record_id: str) -> Any:
     handle.close()
     return result
 
+
 record_synthesizer = dspy.Tool(
     name="record_synthesiser",
     desc="Get summary on a record from an NCBI database (e.g., nucleotide, protein, pubmed)",
@@ -150,6 +167,7 @@ record_synthesizer = dspy.Tool(
     },
     func=summarize_record,
 )
+
 
 class QueryTranslation(dspy.Signature):
     """Compare object snapshot in schema hint to keywords in the original query to find best semantic matches.
@@ -173,13 +191,15 @@ class QueryTranslation(dspy.Signature):
     6. Use VALUES blocks for small sets of constants instead of UNION or OPTIONAL.
     7. Avoid ORDER BY on large result sets - if needed, combine with `LIMIT` and a narrow `WHERE` clause.
     8. Never use nested subqueries unless absolutely necessary; flatten them.
-    9. Use `OPTIONAL` only for truly optional patterns – otherwise, use a simple triple pattern."""
+    9. Use `OPTIONAL` only for truly optional patterns – otherwise, use a simple triple pattern.
+    """
 
     original_query: str = dspy.InputField(desc="User query")
     schema_hint: str = dspy.InputField(desc="GeneNetwork schema from Virtuoso")
     translated_queries: list[str] = dspy.OutputField(
         desc="Top 10 valid SPARQL SELECT query with PREFIX declarations."
     )
+
 
 def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
@@ -283,7 +303,13 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
         schema_hint = build_schema_hint(sparql_uri)
         translate_sparql = dspy.Predict(QueryTranslation)
-        sparql_queries = translate_sparql(original_query=query, schema_hint=schema_hint).get("translated_queries") if pred else []
+        sparql_queries = (
+            translate_sparql(original_query=query, schema_hint=schema_hint).get(
+                "translated_queries"
+            )
+            if pred
+            else []
+        )
 
         async def run_sparql(
             sparql_uri: str,
@@ -303,8 +329,13 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
                     resp.raise_for_status()
                     return resp.json()
                 except httpx.HTTPStatusError as e:
-                    if e.response.status_code in (504, 503, 502) and attempt < max_retries - 1:
-                        await asyncio.sleep(base_delay * (2 ** attempt) + random.uniform(0, 1))
+                    if (
+                        e.response.status_code in (504, 503, 502)
+                        and attempt < max_retries - 1
+                    ):
+                        await asyncio.sleep(
+                            base_delay * (2**attempt) + random.uniform(0, 1)
+                        )
                         continue
                     raise
             return {}
@@ -321,7 +352,9 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
             async def _fetch_one(query: str, idx: int) -> str:
                 try:
-                    result = await run_sparql(sparql_uri, query, max_retries, base_delay)
+                    result = await run_sparql(
+                        sparql_uri, query, max_retries, base_delay
+                    )
                     bindings = result.get("results", {}).get("bindings", [])
                     return f"Query {idx} succeeded ({len(bindings)} rows): {bindings}"
                 except Exception as e:
@@ -333,8 +366,7 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             future = executor.submit(
-                asyncio.run,
-                sparql_fetch(sparql_queries, sparql_uri)
+                asyncio.run, sparql_fetch(sparql_queries, sparql_uri)
             )
             return future.result()
 
@@ -371,10 +403,18 @@ class Research(dspy.Module):
     def forward(self, query: list[BaseMessage]):
         return self.react(query=query)
 
+
 class Consult(dspy.Module):
     def __init__(self):
         super().__init__()
-        self.tools = [splitter, checker, reformulator, ncbi_searcher, record_fetcher, record_synthesizer]
+        self.tools = [
+            splitter,
+            checker,
+            reformulator,
+            ncbi_searcher,
+            record_fetcher,
+            record_synthesizer,
+        ]
 
         self.react = dspy.ReAct(
             signature=ReactSig,
@@ -385,24 +425,30 @@ class Consult(dspy.Module):
     def forward(self, query: list[BaseMessage]):
         return self.react(query=query)
 
+
 class Plan(dspy.Signature):
     """Generate plan to solve query in background"""
+
     background: list[BaseMessage] = dspy.InputField()
     answer: str = dspy.OutputField(desc="The plan to solve the task")
     reasoning: str = dspy.OutputField(
         desc="Concise explanation of the output in 50 words"
     )
 
+
 class Tune(dspy.Signature):
     """Make recommendations to improve user satisfaction to answer generated so far to query"""
+
     background: list[BaseMessage] = dspy.InputField()
     answer: str = dspy.OutputField(desc="The new questions")
     reasoning: str = dspy.OutputField(
         desc="Concise explanation of the output in 50 words"
     )
 
+
 class Supervise(dspy.Signature):
     """Guide the next action the system should take"""
+
     background: list[BaseMessage] = dspy.InputField()
     next_decision: Literal["researcher", "reflector", "expert", "end"] = (
         dspy.OutputField(desc="The next step to take based on instructions")
@@ -411,12 +457,15 @@ class Supervise(dspy.Signature):
         desc="Concise explanation of the decision in 50 words"
     )
 
+
 class Finalize(dspy.Signature):
     """Build the synthesis to send back to the user"""
+
     messages: list[BaseMessage] = dspy.InputField()
     feedback: str = dspy.OutputField(
         desc="Detailed and comprehensive final feedback combining AI outputs in the list of messages and linking them when necessary"
     )
+
 
 class AgentState(BaseModel):
     """

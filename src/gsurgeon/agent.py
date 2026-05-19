@@ -20,10 +20,18 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from pydantic import BaseModel
 from typing_extensions import Annotated, TypedDict
 
-from tools import Consult, Research, Plan, Tune, Supervise, Finalize, AgentState
-from prompts import supervisor_prompt1, supervisor_prompt2, reflector_prompt, planner_prompt, expert_prompt, researcher_prompt
+from prompts import (
+    expert_prompt,
+    planner_prompt,
+    reflector_prompt,
+    researcher_prompt,
+    supervisor_prompt1,
+    supervisor_prompt2,
+)
+from tools import AgentState, Consult, Finalize, Plan, Research, Supervise, Tune
 
 warnings.filterwarnings("ignore")
+
 
 @dataclass
 class GSurgeon:
@@ -35,6 +43,7 @@ class GSurgeon:
         Initialization of multi-agent graph
         Run of query through system
     """
+
     max_iterations: int = 10
 
     def _researcher(self, state: AgentState) -> dict:
@@ -51,7 +60,7 @@ class GSurgeon:
 
     def _expert(self, state: AgentState) -> dict:
         if len(state.messages) < 4:  # handle first call to expert
-            input_text = state.messages[1] + state.messages[0] # use plan and query
+            input_text = state.messages[1] + state.messages[0]  # use plan and query
         else:
             input_text = state.messages[-2]  # use reflection insights
         input_text = [expert_prompt, input_text]
@@ -77,7 +86,11 @@ class GSurgeon:
         ]
         result = tune(background=translated_messages)
         return {
-            "messages": [HumanMessage(f"Progress has been made. Use now all the resources to addess this new suggestion: {result.get('answer')}")],
+            "messages": [
+                HumanMessage(
+                    f"Progress has been made. Use now all the resources to addess this new suggestion: {result.get('answer')}"
+                )
+            ],
         }
 
     def _supervisor(self, state: AgentState) -> dict:
@@ -129,9 +142,7 @@ class GSurgeon:
         first_result = result.get("messages")[
             2
         ].content  # get first researcher feedback
-        second_result = result.get("messages")[
-            3
-        ].content  # get first expert feedback
+        second_result = result.get("messages")[3].content  # get first expert feedback
         finalize = dspy.Predict(Finalize)
         final_result = finalize(messages=result.get("messages")).get("feedback")
         output = f"\nInternal feedback: {first_result}\nExternal feedback: {second_result}\nProcessed feedback: {final_result}"

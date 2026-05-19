@@ -28,8 +28,7 @@ if MODEL_TYPE is None:
 
 MODEL_NAME = os.getenv("MODEL_NAME")
 if MODEL_NAME is None:
-    raise ValueError("MODEL_NAME must be specified - either proprietary or local"
-    )
+    raise ValueError("MODEL_NAME must be specified - either proprietary or local")
 
 if MODEL_TYPE == 0:
     model = dspy.LM(
@@ -59,9 +58,11 @@ else:
 
 dspy.configure(lm=model)
 
+
 async def main(query: str) -> str:
     surgeon = GSurgeon()
     return await surgeon.handler(query)
+
 
 if __name__ == "__main__":
     asyncio.run(main(QUERY))
