@@ -37,30 +37,6 @@ from gnagent.prompts import *
 
 warnings.filterwarnings("ignore")
 
-
-class AgentState(BaseModel):
-    """
-    Represents agent state
-    Avails 02 attributes to allow communication between agents
-    """
-
-    messages: Annotated[list[BaseMessage], add_messages]
-    next_decision: Literal["researcher", "planner", "reflector", "expert", "end"]
-
-
-class ResearcherState(TypedDict):
-    """
-    Represents state of the agent researcher
-    Avails 05 attributes to allow communication between its subcomponents
-    """
-
-    input_text: str
-    chat_history: list[str]
-    context: list[str]
-    answer: str
-    should_continue: str
-
-
 @dataclass
 class GNAgent:
     """
