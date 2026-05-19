@@ -1,3 +1,7 @@
+from Bio import Entrez
+from Bio.Entrez import efetch, esearch, esummary, read
+from langchain_core.messages import BaseMessage
+
 # Specialized modules for researcher
 
 

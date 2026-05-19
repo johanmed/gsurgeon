@@ -5,7 +5,6 @@ Author: Johannes Medagbe
 Copyright (c) 2025
 """
 
-import asyncio
 import json
 import logging
 import os
@@ -351,39 +350,3 @@ class Search:
         output = f"\nInternal feedback: {first_result}\n\nExternal feedback: {second_result}\n\nProcessed feedback: {end_result}"
 
         return output
-
-
-async def main(query: str) -> str:
-    agent = GNAgent(
-        corpus_path=CORPUS_PATH,
-        pcorpus_path=PCORPUS_PATH,
-        db_path=DB_PATH,
-        ext_db_path=EXT_DB_PATH,
-        naturalize_prompt=naturalize_prompt,
-        rephrase_prompt=rephrase_prompt,
-        analyze_prompt=analyze_prompt,
-        check_prompt=check_prompt,
-        summarize_prompt=summarize_prompt,
-        synthesize_prompt=synthesize_prompt,
-        split_prompt=split_prompt,
-        finalize_prompt=finalize_prompt,
-        sup_prompt1=sup_prompt1,
-        sup_prompt2=sup_prompt2,
-        plan_prompt=plan_prompt,
-        refl_prompt=refl_prompt,
-        expert_prompt=expert_prompt,
-    )
-    output = await agent.handler(query)
-    logging.info(f"\n\nSystem feedback: {output}")
-
-    return output
-
-
-if __name__ == "__main__":
-    logging.basicConfig(
-        filename="log_agent.txt",
-        filemode="w",
-        level=logging.INFO,
-        format="%(asctime)s %(message)s",
-    )
-    asyncio.run(main(QUERY))

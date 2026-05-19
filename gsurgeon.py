@@ -1,17 +1,9 @@
-"""
-This module sets up configurations to run agent
-It provides different constructs to interact with the LLM
-Embedding model = Qwen/Qwen3-Embedding-0.6B
-"""
-
+import asyncio
 import os
 from typing import Any, Literal
 
 import dspy
 import torch
-from Bio import Entrez
-from Bio.Entrez import efetch, esearch, esummary, read
-from langchain_core.messages import BaseMessage
 
 CORPUS_PATH = os.getenv("CORPUS_PATH")
 if CORPUS_PATH is None:
@@ -87,3 +79,40 @@ else:
 
 
 dspy.configure(lm=GENERATIVE_MODEL)
+
+
+
+async def main(query: str) -> str:
+    agent = GNAgent(
+        corpus_path=CORPUS_PATH,
+        pcorpus_path=PCORPUS_PATH,
+        db_path=DB_PATH,
+        ext_db_path=EXT_DB_PATH,
+        naturalize_prompt=naturalize_prompt,
+        rephrase_prompt=rephrase_prompt,
+        analyze_prompt=analyze_prompt,
+        check_prompt=check_prompt,
+        summarize_prompt=summarize_prompt,
+        synthesize_prompt=synthesize_prompt,
+        split_prompt=split_prompt,
+        finalize_prompt=finalize_prompt,
+        sup_prompt1=sup_prompt1,
+        sup_prompt2=sup_prompt2,
+        plan_prompt=plan_prompt,
+        refl_prompt=refl_prompt,
+        expert_prompt=expert_prompt,
+    )
+    output = await agent.handler(query)
+    logging.info(f"\n\nSystem feedback: {output}")
+
+    return output
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        filename="log_agent.txt",
+        filemode="w",
+        level=logging.INFO,
+        format="%(asctime)s %(message)s",
+    )
+    asyncio.run(main(QUERY))
