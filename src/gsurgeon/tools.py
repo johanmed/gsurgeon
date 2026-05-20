@@ -496,7 +496,7 @@ class Supervise(dspy.Signature):
 
 
 class Finalize(dspy.Signature):
-    """Build the synthesis to send back to the user"""
+    """Build the final synthesis to send back to the user in less than 200 words"""
 
     messages: list[BaseMessage] = dspy.InputField()
     feedback: str = dspy.OutputField(
