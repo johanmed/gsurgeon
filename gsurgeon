@@ -5,6 +5,7 @@ import asyncio
 import os
 
 import dspy
+from Bio import Entrez
 from dotenv import load_dotenv
 
 from gsurgeon.agent import GSurgeon

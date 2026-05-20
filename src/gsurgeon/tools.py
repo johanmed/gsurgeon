@@ -6,11 +6,11 @@ import json
 
 import dspy
 import httpx
-from Bio import Entrez
 from Bio.Entrez import efetch, esearch, esummary, read
 from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
 from pydantic import BaseModel
-from typing_extensions import Annotated
+from typing_extensions import Annotated, Literal
 
 
 class Split(dspy.Signature):
