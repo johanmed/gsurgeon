@@ -2,6 +2,7 @@
 
 import asyncio
 import concurrent.futures
+import json
 
 import httpx
 from Bio import Entrez
@@ -102,11 +103,14 @@ reformulator = dspy.Tool(
 )
 
 
-def search_ncbi(database: str, term: str, max_results: int = 10) -> Any:
+def search_ncbi(database: str, term: str, max_results: int = 10) -> str:
     handle = esearch(db=database, term=term, retmax=max_results)
     records = read(handle)
     handle.close()
-    return records
+    # Order records for determinism
+    if isinstance(records, dict) and "IdList" in records:
+        records["IdList"] = sorted(records["IdList"])
+    return json.dumps(records, sort_keys=True)
 
 
 ncbi_searcher = dspy.Tool(
@@ -120,8 +124,8 @@ ncbi_searcher = dspy.Tool(
         "term": {"type": "string", "desc": "Search term or query"},
         "max_results": {
             "type": "integer",
-            "desc": "Max results (default 10)",
-            "default": 10,
+            "desc": "Max results (default 100)",
+            "default": 100,
         },
     },
     func=search_ncbi,
@@ -150,11 +154,14 @@ record_fetcher = dspy.Tool(
 )
 
 
-def summarize_record(database: str, record_id: str) -> Any:
+def summarize_record(database: str, record_id: str) -> str:
     handle = esummary(db=database, id=record_id)
     result = read(handle)
     handle.close()
-    return result
+    # If a list of summaries, sort by Id for determinism
+    if isinstance(result, list):
+        result = sorted(result, key=lambda x: x.get("Id", ""))
+    return json.dumps(result, sort_keys=True)
 
 
 record_synthesizer = dspy.Tool(
