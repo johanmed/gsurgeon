@@ -45,6 +45,7 @@ class GSurgeon:
     max_iterations: int = 10
 
     def _researcher(self, state: AgentState) -> dict:
+        print("Calling the researcher...")
         if len(state.messages) < 3:  # handle first call to researcher
             input_text = state.messages[0]  # use original query
         else:
@@ -52,11 +53,13 @@ class GSurgeon:
         input_text = [researcher_prompt, input_text.content]
         research = Research()
         result = research(query=input_text)
+        print("Researcher performed analysis")
         return {
             "messages": [result.get("solution")],
         }
 
     def _expert(self, state: AgentState) -> dict:
+        print("Calling the expert...")
         if len(state.messages) < 4:  # handle first call to expert
             input_text = state.messages[1] + state.messages[0]  # use plan and query
         else:
@@ -64,25 +67,30 @@ class GSurgeon:
         input_text = [expert_prompt, input_text]
         consult = Consult()
         result = consult(query=input_text)
+        print("Expert produced answers")
         return {
             "messages": [result.get("solution")],
         }
 
     def _planner(self, state: AgentState) -> dict:
+        print("Generating a plan to solve the problem...")
         plan = dspy.Predict(Plan)
         input_text = [planner_prompt] + state.messages
         result = plan(background=input_text)
+        print("Plan acquired")
         return {
             "messages": [result.get("answer")],
         }
 
     def reflector(self, state: AgentState) -> dict:
+        print("Calling the reflector...")
         tune = dspy.Predict(Tune)
         trans_map = {AIMessage: HumanMessage, HumanMessage: AIMessage}
         translated_messages = [refl_prompt, state.messages[0]] + [
             trans_map[msg.__class__](content=msg.content) for msg in state.messages[1:]
         ]
         result = tune(background=translated_messages)
+        print("Reflector made suggestions")
         return {
             "messages": [
                 HumanMessage(
@@ -92,6 +100,7 @@ class GSurgeon:
         }
 
     def _supervisor(self, state: AgentState) -> dict:
+        print("Getting guidance from the supervisor...")
         supervise = dspy.Predict(Supervise)
         messages = [
             ("system", self.sup_prompt1),
@@ -101,6 +110,7 @@ class GSurgeon:
         if len(messages) > self.max_iterations:
             return {"next_decision": "end"}
         result = supervise(background=messages)
+        print("Supervisor selected the next worker")
         return {
             "next_decision": result.get("next_decision"),
         }
@@ -130,15 +140,15 @@ class GSurgeon:
             "messages": [("human", query)],
             "next_decision": "planner",  # always plan first
         }
-        result = await graph.ainvoke(initial_state)
-        return result
+        return await graph.ainvoke(initial_state)
 
     async def handle(self, query: str) -> str:
+        print("Starting operation...")
         result = await self._run_graph(query)
         unprocessed_result = result.get("messages")[
             2
         ].content
         finalize = dspy.Predict(Finalize)
         processed_result = finalize(messages=result.get("messages")).get("feedback")
-        output = f"Raw feedback: {unprocessed_result}\nProcessed feedback: {processed_result}"
-        return output
+        print("Operation complete")
+        return f"Raw feedback: {unprocessed_result}\nProcessed feedback: {processed_result}"

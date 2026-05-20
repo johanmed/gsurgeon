@@ -65,4 +65,4 @@ async def operate(query: str) -> str:
 
 
 if __name__ == "__main__":
-    asyncio.run(operate(QUERY))
+    print(asyncio.run(operate(QUERY)))
