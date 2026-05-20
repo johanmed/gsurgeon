@@ -1,4 +1,4 @@
 *~
 poetry.lock
-*/__pycache__/
+src/gsurgeon/__pycache__/
 .env
