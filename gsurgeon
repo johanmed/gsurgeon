@@ -13,7 +13,7 @@ from gsurgeon.agent import GSurgeon
 
 async def operate(query: str) -> str:
     surgeon = GSurgeon()
-    return await surgeon.handler(query)
+    return await surgeon.handle(query)
 
 
 if __name__ == "__main__":

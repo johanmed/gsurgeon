@@ -88,7 +88,7 @@ class GSurgeon:
             "messages": [result.get("answer")],
         }
 
-    def reflector(self, state: AgentState) -> dict:
+    def _reflector(self, state: AgentState) -> dict:
         print("Calling the reflector...")
         tune = dspy.Predict(Tune)
         trans_map = {AIMessage: HumanMessage, HumanMessage: AIMessage}
