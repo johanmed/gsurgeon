@@ -128,23 +128,23 @@ class GSurgeon:
 
     def _build_graph(self) -> Any:
         graph_builder = StateGraph(AgentState)
-        graph_builder.add_node("researcher", self._researcher)
+        graph_builder.add_node("gn_researcher", self._researcher)
         graph_builder.add_node("planner", self._planner)
         graph_builder.add_node("reflector", self._reflector)
         graph_builder.add_node("supervisor", self._supervisor)
-        graph_builder.add_node("expert", self._expert)
+        graph_builder.add_node("ncbi_expert", self._expert)
         graph_builder.add_edge(START, "planner")
         graph_builder.add_edge("planner", "supervisor")
-        graph_builder.add_edge("researcher", "supervisor")
-        graph_builder.add_edge("expert", "supervisor")
+        graph_builder.add_edge("gn_researcher", "supervisor")
+        graph_builder.add_edge("ncbi_expert", "supervisor")
         graph_builder.add_edge("reflector", "supervisor")
         graph_builder.add_conditional_edges(
             "supervisor",
             lambda state: state.next_decision,
             {
                 "reflector": "reflector",
-                "researcher": "researcher",
-                "expert": "expert",
+                "gn_researcher": "gn_researcher",
+                "ncbi_expert": "ncbi_expert",
                 "end": END,
             },
         )

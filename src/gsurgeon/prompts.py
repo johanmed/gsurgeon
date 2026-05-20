@@ -10,14 +10,14 @@ researcher_prompt = SystemMessage(
 
 supervisor_prompt1 = SystemMessage(
     """
-    You are a supervisor for a genomic analysis. You tasked with managing a conversation between the following workers: [researcher, reflector, expert]. Given the following user request, respond with the worker to act next. Each worker will perform a task and respond with its results.
-    Follow the plan made by the planner to decide the next node. Do not finish before completing the plan. When finished, respond with end. Make sure to reflect only once, i.e before finishing.
+    You are a supervisor for a genomic analysis. You tasked with managing a conversation between the following workers: [gn_researcher, ncbi_expert, reflector]. Given the following user request, respond with the worker to act next. Each worker will perform a task and respond with its results.
+    Follow the plan made by the planner to decide the next node. Do not finish before completing the plan. When finished, respond with end. Make sure to reflect right before finishing.
     """
 )
 
 supervisor_prompt2 = SystemMessage(
     """
-    Given the conversation above, who should act next? Or should we end? Select one of: [researcher, reflector, expert, end]. You must help in making progress towards executing and completing the plan. Look at the messages. Do not repeat the same step consecutively. For example, do not call the expert two times consecutively.
+    Given the conversation above, who should act next? Or should we end? Select one of: [gn_researcher, ncbi_expert, reflector, end]. You must help in making progress towards executing and completing the plan. Look at the messages. Do not repeat the same step consecutively. For example, do not call the expert two times consecutively.
     """
 )
 

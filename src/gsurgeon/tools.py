@@ -477,12 +477,12 @@ class Supervise(dspy.Signature):
     """
     Decide the next action the system should take.
     To select the next step, you must take into account the query and the curent context.
-    If the query is not related to GeneNetwork traits, do not call the researcher. The expert should be the main actor.
-    Similarly, do not call the expert if the query is GeneNetwork specific.
+    If the query is not related to GeneNetwork traits, do not call gn_researcher. ncbi_expert should be the main actor.
+    Similarly, do not call the ncbi_expert if the query is GeneNetwork specific.
     """
 
     background: list[BaseMessage] = dspy.InputField()
-    next_decision: Literal["researcher", "reflector", "expert", "end"] = (
+    next_decision: Literal["gn_researcher", "ncbi_expert", "reflector", "end"] = (
         dspy.OutputField(desc="The next step to take based on instructions")
     )
     reasoning: str = dspy.OutputField(
@@ -506,4 +506,4 @@ class AgentState(BaseModel):
     """
 
     messages: Annotated[list[BaseMessage], add_messages]
-    next_decision: Literal["researcher", "planner", "reflector", "expert", "end"]
+    next_decision: Literal["gn_researcher", "planner", "reflector", "ncbi_expert", "end"]
