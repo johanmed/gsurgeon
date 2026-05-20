@@ -9,10 +9,10 @@ import json
 import logging
 import os
 import time
-import warnings
 from dataclasses import dataclass
 from typing import Any
 
+import dspy
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
@@ -35,8 +35,6 @@ from gsurgeon.tools import (
     Supervise,
     Tune,
 )
-
-warnings.filterwarnings("ignore")
 
 
 @dataclass

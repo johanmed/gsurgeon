@@ -4,6 +4,7 @@ import asyncio
 import concurrent.futures
 import json
 
+import dspy
 import httpx
 from Bio import Entrez
 from Bio.Entrez import efetch, esearch, esummary, read
