@@ -7,11 +7,11 @@ from typing import Any
 
 import dspy
 import httpx
-import SPARQLWrapper
 from Bio.Entrez import efetch, esearch, esummary, read
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel
+from SPARQLWrapper import JSON, SPARQLWrapper
 from typing_extensions import Annotated, Literal
 
 
@@ -315,9 +315,10 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
         schema_hint = build_schema_hint(sparql_uri)
         translate_sparql = dspy.Predict(QueryTranslation)
-        sparql_queries = translate_sparql(original_query=query, schema_hint=schema_hint).get(
-                "translated_queries")
-                
+        sparql_queries = translate_sparql(
+            original_query=query, schema_hint=schema_hint
+        ).get("translated_queries")
+
         async def run_sparql(
             sparql_uri: str,
             query: str,
@@ -509,4 +510,6 @@ class AgentState(BaseModel):
     """
 
     messages: Annotated[list[BaseMessage], add_messages]
-    next_decision: Literal["gn_researcher", "planner", "reflector", "ncbi_expert", "end"]
+    next_decision: Literal[
+        "gn_researcher", "planner", "reflector", "ncbi_expert", "end"
+    ]
