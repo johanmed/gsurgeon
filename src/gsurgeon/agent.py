@@ -97,7 +97,7 @@ class GSurgeon:
         print("Calling the reflector...")
         tune = dspy.Predict(Tune)
         trans_map = {AIMessage: HumanMessage, HumanMessage: AIMessage}
-        translated_messages = [refl_prompt, state.messages[0]] + [
+        translated_messages = [reflector_prompt, state.messages[0]] + [
             trans_map[msg.__class__](content=msg.content) for msg in state.messages[1:]
         ]
         result = await asyncio.to_thread(tune, background=translated_messages)
@@ -114,9 +114,9 @@ class GSurgeon:
         print("Getting guidance from the supervisor...")
         supervise = dspy.Predict(Supervise)
         messages = [
-            ("system", self.sup_prompt1),
+            supervisor_prompt1,
             *state.messages,
-            ("system", self.sup_prompt2),
+            supervisor_prompt2,
         ]
         if len(messages) > self.max_iterations:
             return {"next_decision": "end"}
@@ -162,6 +162,8 @@ class GSurgeon:
         result = await self._run_graph(query)
         unprocessed_result = result.get("messages")[2].content
         finalize = dspy.Predict(Finalize)
-        processed_result = await asyncio.to_thread(lambda: finalize(messages=result.get("messages")).get("feedback"))
+        processed_result = await asyncio.to_thread(
+            lambda: finalize(messages=result.get("messages")).get("feedback")
+        )
         print("Operation complete")
         return f"Raw feedback: {unprocessed_result}\nProcessed feedback: {processed_result}"
