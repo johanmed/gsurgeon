@@ -391,7 +391,14 @@ class ReactSig(dspy.Signature):
 
 
 class Research(dspy.Module):
-    """Address a query or plan to completion using GeneNetwork resources only"""
+    """
+    Address a query or plan to completion using GeneNetwork resources only.
+    For effficiency, only call a tool when it is strictly necessary in completing the next task.
+    Use splitter when input query is too complex to be handled in a single step.
+    Harness the reformulator to clarify a request when it seems ambiguous.
+    To get a specific information, call the fetcher. It has access to data and can extract any information.
+    Once an information is extracted, check its relevance with the checker before proceeding.
+    """
 
     def __init__(self):
         super().__init__()
@@ -409,7 +416,16 @@ class Research(dspy.Module):
 
 
 class Consult(dspy.Module):
-    """Address a query or plan to completion using NCBI resources only"""
+    """
+    Address a query or plan to completion using NCBI resources only.
+    For effficiency, only call a tool when it is strictly necessary in completing the next task.
+    Use splitter when input query is too complex to be handled in a single step.
+    Harness the reformulator to clarify a request when it seems ambiguous.
+    Extract answers from NCBI by performing first a search with ncbi_searcher.
+    When search results contain records, fetch information with record_fetcher.
+    For records with a lot of data specifically, take some time to synthesize informations.
+    Check relevance of generated information with the checker before proceeding.
+    """
 
     def __init__(self):
         super().__init__()
