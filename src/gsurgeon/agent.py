@@ -135,11 +135,10 @@ class GSurgeon:
 
     async def handle(self, query: str) -> str:
         result = await self._run_graph(query)
-        first_result = result.get("messages")[
+        unprocessed_result = result.get("messages")[
             2
-        ].content  # get first researcher feedback
-        second_result = result.get("messages")[3].content  # get first expert feedback
+        ].content
         finalize = dspy.Predict(Finalize)
-        final_result = finalize(messages=result.get("messages")).get("feedback")
-        output = f"\nInternal feedback: {first_result}\nExternal feedback: {second_result}\nProcessed feedback: {final_result}"
+        processed_result = finalize(messages=result.get("messages")).get("feedback")
+        output = f"Raw feedback: {unprocessed_result}\nProcessed feedback: {processed_result}"
         return output

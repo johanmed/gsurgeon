@@ -59,10 +59,10 @@ else:
 dspy.configure(lm=model)
 
 
-async def main(query: str) -> str:
+async def operate(query: str) -> str:
     surgeon = GSurgeon()
     return await surgeon.handler(query)
 
 
 if __name__ == "__main__":
-    asyncio.run(main(QUERY))
+    asyncio.run(operate(QUERY))
