@@ -49,7 +49,7 @@ class GSurgeon:
         Run of query through system
     """
 
-    max_iterations: int = 10
+    max_iterations: int = 5
     _graph: Any = field(init=False)
 
     def __post_init__(self):
