@@ -3,9 +3,11 @@
 import asyncio
 import concurrent.futures
 import json
+from typing import Any
 
 import dspy
 import httpx
+import SPARQLWrapper
 from Bio.Entrez import efetch, esearch, esummary, read
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
