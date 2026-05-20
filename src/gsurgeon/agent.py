@@ -5,11 +5,12 @@ Author: Johannes Medagbe
 Copyright (c) 2026
 """
 
+import asyncio
 import json
 import logging
 import os
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import dspy
@@ -49,8 +50,12 @@ class GSurgeon:
     """
 
     max_iterations: int = 10
+    _graph: Any = field(init=False)
 
-    def _researcher(self, state: AgentState) -> dict:
+    def __post_init__(self):
+        self._graph = self._build_graph()
+
+    async def _researcher(self, state: AgentState) -> dict:
         print("Calling the researcher...")
         if len(state.messages) < 3:  # handle first call to researcher
             input_text = state.messages[0]  # use original query
@@ -58,13 +63,13 @@ class GSurgeon:
             input_text = state.messages[-1]  # use reflection insights
         input_text = [researcher_prompt, input_text.content]
         research = Research()
-        result = research(query=input_text)
+        result = await asyncio.to_thread(research, query=input_text)
         print("Researcher performed analysis")
         return {
             "messages": [result.get("solution")],
         }
 
-    def _expert(self, state: AgentState) -> dict:
+    async def _expert(self, state: AgentState) -> dict:
         print("Calling the expert...")
         if len(state.messages) < 4:  # handle first call to expert
             input_text = state.messages[1] + state.messages[0]  # use plan and query
@@ -72,30 +77,30 @@ class GSurgeon:
             input_text = state.messages[-2]  # use reflection insights
         input_text = [expert_prompt, input_text]
         consult = Consult()
-        result = consult(query=input_text)
+        result = await asyncio.to_thread(consult, query=input_text)
         print("Expert produced answers")
         return {
             "messages": [result.get("solution")],
         }
 
-    def _planner(self, state: AgentState) -> dict:
+    async def _planner(self, state: AgentState) -> dict:
         print("Generating a plan to solve the problem...")
         plan = dspy.Predict(Plan)
         input_text = [planner_prompt] + state.messages
-        result = plan(background=input_text)
+        result = await asyncio.to_thread(plan, background=input_text)
         print("Plan acquired")
         return {
             "messages": [result.get("answer")],
         }
 
-    def _reflector(self, state: AgentState) -> dict:
+    async def _reflector(self, state: AgentState) -> dict:
         print("Calling the reflector...")
         tune = dspy.Predict(Tune)
         trans_map = {AIMessage: HumanMessage, HumanMessage: AIMessage}
         translated_messages = [refl_prompt, state.messages[0]] + [
             trans_map[msg.__class__](content=msg.content) for msg in state.messages[1:]
         ]
-        result = tune(background=translated_messages)
+        result = await asyncio.to_thread(tune, background=translated_messages)
         print("Reflector made suggestions")
         return {
             "messages": [
@@ -105,7 +110,7 @@ class GSurgeon:
             ],
         }
 
-    def _supervisor(self, state: AgentState) -> dict:
+    async def _supervisor(self, state: AgentState) -> dict:
         print("Getting guidance from the supervisor...")
         supervise = dspy.Predict(Supervise)
         messages = [
@@ -115,13 +120,13 @@ class GSurgeon:
         ]
         if len(messages) > self.max_iterations:
             return {"next_decision": "end"}
-        result = supervise(background=messages)
+        result = await asyncio.to_thread(supervise, background=messages)
         print("Supervisor selected the next worker")
         return {
             "next_decision": result.get("next_decision"),
         }
 
-    async def _run_graph(self, query: str) -> Any:
+    def _build_graph(self) -> Any:
         graph_builder = StateGraph(AgentState)
         graph_builder.add_node("researcher", self._researcher)
         graph_builder.add_node("planner", self._planner)
@@ -129,8 +134,10 @@ class GSurgeon:
         graph_builder.add_node("supervisor", self._supervisor)
         graph_builder.add_node("expert", self._expert)
         graph_builder.add_edge(START, "planner")
+        graph_builder.add_edge("planner", "supervisor")
         graph_builder.add_edge("researcher", "supervisor")
         graph_builder.add_edge("expert", "supervisor")
+        graph_builder.add_edge("reflector", "supervisor")
         graph_builder.add_conditional_edges(
             "supervisor",
             lambda state: state.next_decision,
@@ -141,18 +148,20 @@ class GSurgeon:
                 "end": END,
             },
         )
-        graph = graph_builder.compile()
+        return graph_builder.compile()
+
+    async def _run_graph(self, query: str) -> Any:
         initial_state = {
             "messages": [("human", query)],
             "next_decision": "planner",  # always plan first
         }
-        return await graph.ainvoke(initial_state)
+        return await self._graph.ainvoke(initial_state)
 
     async def handle(self, query: str) -> str:
         print("Starting operation...")
         result = await self._run_graph(query)
         unprocessed_result = result.get("messages")[2].content
         finalize = dspy.Predict(Finalize)
-        processed_result = finalize(messages=result.get("messages")).get("feedback")
+        processed_result = await asyncio.to_thread(lambda: finalize(messages=result.get("messages")).get("feedback"))
         print("Operation complete")
         return f"Raw feedback: {unprocessed_result}\nProcessed feedback: {processed_result}"
