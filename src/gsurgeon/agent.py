@@ -56,6 +56,7 @@ class GSurgeon:
         self._graph = self._build_graph()
 
     async def _researcher(self, state: AgentState) -> dict:
+        """Answer query with GeneNetwork information"""
         print("Calling the researcher...")
         if len(state.messages) < 3:  # handle first call to researcher
             input_text = state.messages[0]  # use original query
@@ -70,6 +71,7 @@ class GSurgeon:
         }
 
     async def _expert(self, state: AgentState) -> dict:
+        """Answer query with NCBI information"""
         print("Calling the expert...")
         if len(state.messages) < 4:  # handle first call to expert
             input_text = state.messages[1] + state.messages[0]  # use plan and query
@@ -84,6 +86,7 @@ class GSurgeon:
         }
 
     async def _planner(self, state: AgentState) -> dict:
+        """Generate a plan to solve query"""
         print("Generating a plan to solve the problem...")
         plan = dspy.Predict(Plan)
         input_text = [planner_prompt] + state.messages
@@ -94,6 +97,7 @@ class GSurgeon:
         }
 
     async def _reflector(self, state: AgentState) -> dict:
+        """Propose improvements to answer"""
         print("Calling the reflector...")
         tune = dspy.Predict(Tune)
         trans_map = {AIMessage: HumanMessage, HumanMessage: AIMessage}
@@ -111,6 +115,7 @@ class GSurgeon:
         }
 
     async def _supervisor(self, state: AgentState) -> dict:
+        """Orchestrate agentic system"""
         print("Getting guidance from the supervisor...")
         supervise = dspy.Predict(Supervise)
         messages = [
@@ -158,6 +163,7 @@ class GSurgeon:
         return await self._graph.ainvoke(initial_state)
 
     async def handle(self, query: str) -> str:
+        """Run query through the system"""
         print("Starting operation...")
         result = await self._run_graph(query)
         unprocessed_result = result.get("messages")[2].content

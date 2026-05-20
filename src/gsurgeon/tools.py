@@ -16,12 +16,13 @@ from typing_extensions import Annotated, Literal
 
 
 class Split(dspy.Signature):
+    """Split query into multiple atomic subqueries easier to handle for better satisfaction"""
+
     query: str = dspy.InputField()
     answer: list[str] = dspy.OutputField(desc="The list of smaller tasks")
 
 
 def split_query(query: str) -> list[str]:
-    """Split query into multiple atomic subqueries easier to handle for better satisfaction"""
     split = dspy.Predict(Split)
     return split(query=query).get("answer")
 
@@ -248,7 +249,7 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
             def fetch_schema(sparql_uri: str) -> tuple[set[str], set[str], set[str]]:
                 """Fetch literal and object properties from the live Virtuoso endpoint.
-                Return (literal_props, object_props) where each is a set of full URIs.
+                Return (literal_props, iri_props) where each is a set of full URIs.
                 """
                 sparql = SPARQLWrapper(sparql_uri)
                 sparql.setReturnFormat(JSON)
@@ -295,7 +296,7 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
             {" ,".join([uri_to_qname(uri) for uri in literal_props])}
 
             IRI PROPERTIES (object is a URI / another resource):
-            {" ,".join([uri_to_qname(uri) for uri in object_props])}
+            {" ,".join([uri_to_qname(uri) for uri in iri_props])}
 
             SPECIAL HINTS FOR TRIPLE GENERATION:
             1. To check if a trait is mapped, use: `?trait a gnt:mappedTrait .`
@@ -408,7 +409,7 @@ class Research(dspy.Module):
 
     def __init__(self):
         super().__init__()
-        fetcher = make_sparql_tool("http://sparql.genenetwork.org/sparql")
+        fetcher = make_sparql_tool("https://sparql.genenetwork.org/sparql")
         self.tools = [splitter, checker, reformulator, fetcher]
 
         self.react = dspy.ReAct(
