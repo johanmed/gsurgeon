@@ -6,6 +6,8 @@ import os
 import dspy
 import torch
 
+from gsurgeon.agent import GSurgeon
+
 QUERY = os.getenv("QUERY")
 if QUERY is None:
     raise ValueError("QUERY must be specified for program to run")

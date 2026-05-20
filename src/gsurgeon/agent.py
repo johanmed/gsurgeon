@@ -18,7 +18,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from prompts import (
+from gsurgeon.prompts import (
     expert_prompt,
     planner_prompt,
     reflector_prompt,
@@ -26,7 +26,15 @@ from prompts import (
     supervisor_prompt1,
     supervisor_prompt2,
 )
-from tools import AgentState, Consult, Finalize, Plan, Research, Supervise, Tune
+from gsurgeon.tools import (
+    AgentState,
+    Consult,
+    Finalize,
+    Plan,
+    Research,
+    Supervise,
+    Tune,
+)
 
 warnings.filterwarnings("ignore")
 
@@ -145,9 +153,7 @@ class GSurgeon:
     async def handle(self, query: str) -> str:
         print("Starting operation...")
         result = await self._run_graph(query)
-        unprocessed_result = result.get("messages")[
-            2
-        ].content
+        unprocessed_result = result.get("messages")[2].content
         finalize = dspy.Predict(Finalize)
         processed_result = finalize(messages=result.get("messages")).get("feedback")
         print("Operation complete")
