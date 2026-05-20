@@ -315,14 +315,9 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
         schema_hint = build_schema_hint(sparql_uri)
         translate_sparql = dspy.Predict(QueryTranslation)
-        sparql_queries = (
-            translate_sparql(original_query=query, schema_hint=schema_hint).get(
-                "translated_queries"
-            )
-            if pred
-            else []
-        )
-
+        sparql_queries = translate_sparql(original_query=query, schema_hint=schema_hint).get(
+                "translated_queries")
+                
         async def run_sparql(
             sparql_uri: str,
             query: str,
