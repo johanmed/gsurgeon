@@ -405,6 +405,9 @@ class Research(dspy.Module):
     Harness the reformulator to clarify a request when it seems ambiguous.
     To get a specific information, call the fetcher. It has access to data and can extract any information.
     Once an information is extracted, check its relevance with the checker before proceeding.
+    For reproducibility, seed your reasoning on the following master thoughts:
+        1. GeneNetwork has the data requested by the user and it can be obtained with targeted SPARQL queries.
+        2. Reasoning does not need to be complicated. Prefer the simplest approach.
     """
 
     def __init__(self):
@@ -432,6 +435,9 @@ class Consult(dspy.Module):
     When search results contain records, fetch information with record_fetcher.
     For records with a lot of data specifically, take some time to synthesize informations.
     Check relevance of generated information with the checker before proceeding.
+    For reproducibility, seed your reasoning on the following master thoughts:
+        1. NCBI has the data requested by the user and it can be obtained by using a combination of terms with AND or OR keywords.
+        2. Reasoning does not need to be complicated. Prefer the simplest approach.
     """
 
     def __init__(self):
@@ -456,7 +462,11 @@ class Consult(dspy.Module):
 
 
 class Plan(dspy.Signature):
-    """Generate plan to solve query in background"""
+    """
+    Generate plan to solve query in background.
+    For reproducibility, seed the plan generation on the following master thought:
+    The query submitted by the user can be addressed in less than 5 straightforward and targeted steps. No need to complicate things.
+    """
 
     background: list[BaseMessage] = dspy.InputField()
     answer: str = dspy.OutputField(desc="The plan to solve the task")
