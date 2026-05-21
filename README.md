@@ -6,12 +6,12 @@
 
 ## What questions can you ask GSurgeon?
 
-**GSurgeon** has been tested on questions related to model organisms involving markers, genes and traits
+**GSurgeon** has been tested on questions related to model organisms involving markers, genes and traits.
 
 As such it has good performance on queries such as:
 
 - Which genes on chromosome 1 of the mouse genome are related to inflammation and diabetes at the same time?
-- List traits measured in GeneNetwork that are related to diabetes
+- List traits measured in GeneNetwork that are related to diabetes.
 
 Other queries in the realm of biology and genomics are also possible.
 
@@ -34,7 +34,7 @@ git clone https://github.com/johanmed/gsurgeon.git
 - API_KEY: provider key
 - EMAIL: email address for NCBI authentication
 
-We recommend creating them in an environment file. For more details, see file `env_example`
+We recommend creating them in an environment file. For more details, see file `env_example`.
 
 *3. Add gsurgeon path to your search path*
 
@@ -42,7 +42,7 @@ We recommend creating them in an environment file. For more details, see file `e
 export PATH="$PATH:/path/to/project"
 ```
 
-Replace the path above by yours. You can also add it to your file `~/.bashrc`
+Replace the path above by yours. You can also add it to your file `~/.bashrc`.
 
 *4. Run your query*
 
@@ -74,7 +74,7 @@ Despite advances in language AI, hallucination remains a serious concern in biol
 
 *3. Empower your LLM to handle with surgical precision the hard work for you with no limits*
 
-**GSurgeon** exploits reasoning capabilities of LLM to orchestrate the search of biological information. Using its knowledge of biological databases, it finds dynamically the best approach of answering or completing the task you have in mind. 
+**GSurgeon** exploits reasoning capabilities of LLM to orchestrate the search of biological information. Using its knowledge of biological databases, it finds dynamically the best approach of answering or completing the task you have in mind.
 
 The execution logic is abstracted to give full control to the agents. No need for extra coding!
 
