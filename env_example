@@ -1,0 +1,4 @@
+N_ITERATIONS=5
+MODEL_NAME="anthropic/claude-sonnet-4-6"
+API_KEY="XXXX"
+EMAIL="XXXX"
