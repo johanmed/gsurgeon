@@ -1,6 +1,6 @@
-# GSurgeon: the genomic surgeon
+## GSurgeon: the genomic surgeon
 
-## What is GSurgeon?
+### What is GSurgeon?
 
 **GSurgeon** is an AI tool to dissect biology of model organisms through genomic information. It leverages LLM capabilities to send dynamic requests in natural language to genomic databases and extract any biological information.
 
