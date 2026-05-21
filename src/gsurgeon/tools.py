@@ -128,8 +128,8 @@ ncbi_searcher = dspy.Tool(
         "term": {"type": "string", "desc": "Search term or query"},
         "max_results": {
             "type": "integer",
-            "desc": "Max results (default 1000)",
-            "default": 1000,
+            "desc": "Max results (default 2000)",
+            "default": 2000,
         },
     },
     func=search_ncbi,
