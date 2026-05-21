@@ -1,16 +1,12 @@
-## GSurgeon: the genomic surgeon
+# GSurgeon: the genomic surgeon
 
-### What is GSurgeon?
+## What is GSurgeon?
 
 **GSurgeon** is an AI tool to dissect biology of model organisms through genomic information. It leverages LLM capabilities to send dynamic requests in natural language to genomic databases and extract any biological information.
 
-### What questions can you ask GSurgeon?
+## What questions can you ask GSurgeon?
 
-**GSurgeon** has been tested on questions related to model organisms involving:
-
-- markers
-- genes
-- traits
+**GSurgeon** has been tested on questions related to model organisms involving markers, genes and traits
 
 As such it has good performance on queries such as:
 
@@ -19,7 +15,7 @@ As such it has good performance on queries such as:
 
 Other queries in the realm of biology and genomics are also possible.
 
-### How to install and run GSurgeon?
+## How to install and run GSurgeon?
 
 *1. Get the source code*
 
@@ -56,7 +52,7 @@ gsurgeon --env-file env_example "Which genes on chromosome 1 of the mouse genome
 
 Replace the query above by yours.
 
-### Why use GSurgeon?
+## Why use GSurgeon?
 
 *1. Access to up-to-date biological information*
 
