@@ -394,7 +394,7 @@ def make_sparql_tool(sparql_uri: str) -> dspy.Tool:
 
 class ReactSig(dspy.Signature):
     query: list[BaseMessage] = dspy.InputField()
-    solution: str = dspy.OutputField(desc="The final answer to the query")
+    solution: str = dspy.OutputField(desc="Final answer to the query in 2000 words max making use of all relevant information in accumulated context.")
 
 
 class Research(dspy.Module):
