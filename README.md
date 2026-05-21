@@ -4,7 +4,7 @@
 
 **GSurgeon** is an AI tool to dissect biology of model organisms through genomic information. It leverages LLM capabilities to send dynamic requests in natural language to genomic databases and extract any biological information.
 
-## What questions can you ask GSurgeon?
+### What questions can you ask GSurgeon?
 
 **GSurgeon** has been tested on questions related to model organisms involving:
 
@@ -19,7 +19,7 @@ As such it has good performance on queries such as:
 
 Other queries in the realm of biology and genomics are also possible.
 
-## Why use GSurgeon?
+### Why use GSurgeon?
 
 *1. Access to up-to-date biological information*
 
@@ -45,13 +45,17 @@ Despite advances in language AI, hallucination remains a serious concern in biol
 
 The tool footprint is lightweight. Most of the computational resources required to run the system are handled by the provider. No need to have monstruous specs to get started!
 
-*GSurgeon* can be executed on the command-line on any model, provided sufficient training.
+**GSurgeon** can be executed on the command-line on any model, provided sufficient training.
 
-## How to install and run GSurgeon?
+### How to install and run GSurgeon?
 
 1. Get the source code
 
 You can clone this repository or download the package.
+
+```bash
+https://github.com/johanmed/gsurgeon.git
+```
 
 2. Set tool parameters
 
@@ -70,7 +74,7 @@ We recommend creating them in an environment file. For more details, see file `e
 export PATH="$PATH:/path/to/project"
 ```
 
-You can also add it to your file `~/.bashrc`
+Replace the path above by yours. You can also add it to your file `~/.bashrc`
 
 4. Run your query
 
