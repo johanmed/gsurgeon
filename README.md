@@ -23,7 +23,7 @@ Other queries in the realm of biology and genomics are also possible.
 
 *1. Access to up-to-date biological information*
 
-Accessing genomic information is a pain. It requires knowledge of right databases to query but also skills to dig deep and find relevant information. **GSurgeon** makes the process easier for the community by providing a simpler, yet powerful interface to interact with biological databases. **GSurgeon** queries directly database endpoints, providing latest information.
+Accessing genomic information is a pain. It requires knowledge of right databases to query but also skills to dig deep and find relevant information. **GSurgeon** makes the process easier for the community by providing a simpler, yet powerful interface to interact in real time with biological databases.
 
 In the research ecosystem, this can be used for a variety of applications:
 
@@ -41,7 +41,9 @@ Despite advances in language AI, hallucination remains a serious concern in biol
 
 *3. Empower your LLM to handle with surgical precision the hard work for you with no limits*
 
-**GSurgeon** exploits reasoning capabilities of LLM to orchestrate the search of biological information. Using its knowledge of biological databases, it finds dynamically the best approach of answering or completing the task you have in mind. The execution logic is abstracted to give full control to the agents. No need for extra coding!
+**GSurgeon** exploits reasoning capabilities of LLM to orchestrate the search of biological information. Using its knowledge of biological databases, it finds dynamically the best approach of answering or completing the task you have in mind. 
+
+The execution logic is abstracted to give full control to the agents. No need for extra coding!
 
 The tool footprint is lightweight. Most of the computational resources required to run the system are handled by the provider. No need to have monstruous specs to get started!
 
@@ -49,7 +51,7 @@ The tool footprint is lightweight. Most of the computational resources required 
 
 ### How to install and run GSurgeon?
 
-1. Get the source code
+*1. Get the source code*
 
 You can clone this repository or download the package.
 
@@ -57,7 +59,7 @@ You can clone this repository or download the package.
 https://github.com/johanmed/gsurgeon.git
 ```
 
-2. Set tool parameters
+*2. Set tool parameters*
 
 **GSurgeon** expects a number of parameters to be defined for the surgery:
 
@@ -68,7 +70,7 @@ https://github.com/johanmed/gsurgeon.git
 
 We recommend creating them in an environment file. For more details, see file `env_example`
 
-3. Add gsurgeon path to your search path
+*3. Add gsurgeon path to your search path*
 
 ```bash
 export PATH="$PATH:/path/to/project"
@@ -76,7 +78,7 @@ export PATH="$PATH:/path/to/project"
 
 Replace the path above by yours. You can also add it to your file `~/.bashrc`
 
-4. Run your query
+*4. Run your query*
 
 ```bash
 gsurgeon --env-file env_example "Which genes on chromosome 1 of the mouse genome are related to inflammation and diabetes at the same time?"
