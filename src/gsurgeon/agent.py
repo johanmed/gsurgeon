@@ -67,7 +67,7 @@ class GSurgeon:
         result = await asyncio.to_thread(research, query=input_text)
         print("Researcher performed analysis")
         return {
-            "messages": [result.get("solution")],
+            "messages": [AIMessage(result.get("solution"))],
         }
 
     async def _expert(self, state: AgentState) -> dict:
@@ -82,7 +82,7 @@ class GSurgeon:
         result = await asyncio.to_thread(consult, query=input_text)
         print("Expert produced answers")
         return {
-            "messages": [result.get("solution")],
+            "messages": [AIMessage(result.get("solution"))],
         }
 
     async def _planner(self, state: AgentState) -> dict:
@@ -93,7 +93,7 @@ class GSurgeon:
         result = await asyncio.to_thread(plan, background=input_text)
         print("Plan acquired")
         return {
-            "messages": [result.get("answer")],
+            "messages": [AIMessage(result.get("answer"))],
         }
 
     async def _reflector(self, state: AgentState) -> dict:
@@ -157,7 +157,7 @@ class GSurgeon:
 
     async def _run_graph(self, query: str) -> Any:
         initial_state = {
-            "messages": [("human", query)],
+            "messages": [HumanMessage(query)],
             "next_decision": "planner",  # always plan first
         }
         return await self._graph.ainvoke(initial_state)
