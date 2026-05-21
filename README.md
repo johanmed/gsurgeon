@@ -19,6 +19,43 @@ As such it has good performance on queries such as:
 
 Other queries in the realm of biology and genomics are also possible.
 
+### How to install and run GSurgeon?
+
+*1. Get the source code*
+
+You can clone this repository or download the package.
+
+```bash
+git clone https://github.com/johanmed/gsurgeon.git
+```
+
+*2. Set tool parameters*
+
+**GSurgeon** expects a number of parameters to be defined for the surgery:
+
+- N_ITERATIONS: number of operations
+- MODEL_NAME: DSPy model identifier
+- API_KEY: provider key
+- EMAIL: email address for NCBI authentication
+
+We recommend creating them in an environment file. For more details, see file `env_example`
+
+*3. Add gsurgeon path to your search path*
+
+```bash
+export PATH="$PATH:/path/to/project"
+```
+
+Replace the path above by yours. You can also add it to your file `~/.bashrc`
+
+*4. Run your query*
+
+```bash
+gsurgeon --env-file env_example "Which genes on chromosome 1 of the mouse genome are related to inflammation and diabetes at the same time?"
+```
+
+Replace the query above by yours.
+
 ### Why use GSurgeon?
 
 *1. Access to up-to-date biological information*
@@ -48,40 +85,3 @@ The execution logic is abstracted to give full control to the agents. No need fo
 The tool footprint is lightweight. Most of the computational resources required to run the system are handled by the provider. No need to have monstruous specs to get started!
 
 **GSurgeon** can be executed on the command-line on any model, provided sufficient training.
-
-### How to install and run GSurgeon?
-
-*1. Get the source code*
-
-You can clone this repository or download the package.
-
-```bash
-https://github.com/johanmed/gsurgeon.git
-```
-
-*2. Set tool parameters*
-
-**GSurgeon** expects a number of parameters to be defined for the surgery:
-
-- N_ITERATIONS: number of operations
-- MODEL_NAME: DSPy model identifier
-- API_KEY: provider key
-- EMAIL: email address for NCBI authentication
-
-We recommend creating them in an environment file. For more details, see file `env_example`
-
-*3. Add gsurgeon path to your search path*
-
-```bash
-export PATH="$PATH:/path/to/project"
-```
-
-Replace the path above by yours. You can also add it to your file `~/.bashrc`
-
-*4. Run your query*
-
-```bash
-gsurgeon --env-file env_example "Which genes on chromosome 1 of the mouse genome are related to inflammation and diabetes at the same time?"
-```
-
-Replace the query above by yours.
