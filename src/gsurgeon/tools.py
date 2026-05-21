@@ -128,8 +128,8 @@ ncbi_searcher = dspy.Tool(
         "term": {"type": "string", "desc": "Search term or query"},
         "max_results": {
             "type": "integer",
-            "desc": "Max results (default 200)",
-            "default": 200,
+            "desc": "Max results (default 1000)",
+            "default": 1000,
         },
     },
     func=search_ncbi,
@@ -496,7 +496,7 @@ class Supervise(dspy.Signature):
 
 
 class Finalize(dspy.Signature):
-    """Build the final synthesis to send back to the user in less than 200 words"""
+    """Build the final synthesis to send back to the user in less than 500 words"""
 
     messages: list[BaseMessage] = dspy.InputField()
     feedback: str = dspy.OutputField(
