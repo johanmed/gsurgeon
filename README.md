@@ -19,7 +19,7 @@ Other queries in the realm of biology and genomics are also possible.
 
 #### 1. Get the source code
 
-You can clone this repository or download the package.
+You can clone this repository.
 
 ```bash
 git clone https://github.com/johanmed/gsurgeon.git
