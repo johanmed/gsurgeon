@@ -1,6 +1,6 @@
 [project]
 name = "gsurgeon"
-version = "0.1.0"
+version = "1.0.0"
 description = "A tool to dissect biology of model organisms using genomic information"
 authors = [
     {name = "Johannes Medagbe",email = "johanmedagbe@gmail.com"}
