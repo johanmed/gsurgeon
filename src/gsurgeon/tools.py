@@ -524,3 +524,13 @@ class AgentState(BaseModel):
     next_decision: Literal[
         "gn_researcher", "planner", "reflector", "ncbi_expert", "end"
     ]
+
+class Reproduce(dspy.Signature):
+    """
+    Extract answers that are consistent across results.
+    Do not include information that is missing in some results for reproducibility.
+    Synthesize a coherent and detailed solution to the query using answer consensus.
+    """
+    query: str = dspy.InputField()
+    results: list = dspy.InputField(desc="List of results generated to the same query by the system")
+    consensus: str = dspy.OutputField(desc="Final output built from consistent answers across results")
