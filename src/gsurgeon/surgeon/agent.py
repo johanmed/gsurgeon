@@ -1,9 +1,4 @@
-"""
-Multi-agent system to dissect genomic information
-Main module of the package
-Author: Johannes Medagbe
-Copyright (c) 2026
-"""
+"""GSurgeon: Multi-agent system to dissect genomic information"""
 
 import asyncio
 import json
@@ -14,12 +9,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import dspy
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from langgraph.graph import END, START, StateGraph
-from langgraph.graph.message import add_messages
-from langgraph.prebuilt import ToolNode, tools_condition
-
-from gsurgeon.prompts import (
+from gsurgeon.procedures.react import Consult, Research
+from gsurgeon.procedures.standard import Finalize, Plan, Supervise, Tune
+from gsurgeon.surgeon.prompts import (
     expert_prompt,
     planner_prompt,
     reflector_prompt,
@@ -27,15 +19,24 @@ from gsurgeon.prompts import (
     supervisor_prompt1,
     supervisor_prompt2,
 )
-from gsurgeon.tools import (
-    AgentState,
-    Consult,
-    Finalize,
-    Plan,
-    Research,
-    Supervise,
-    Tune,
-)
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode, tools_condition
+from pydantic import BaseModel
+from typing_extensions import Annotated, Literal
+
+
+class AgentState(BaseModel):
+    """
+    Represent agent state
+    Avail 02 attributes to allow communication between agents
+    """
+
+    messages: Annotated[list[BaseMessage], add_messages]
+    next_decision: Literal[
+        "gn_researcher", "planner", "reflector", "ncbi_expert", "end"
+    ]
 
 
 @dataclass

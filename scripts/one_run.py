@@ -1,4 +1,8 @@
-"""Script to run gsurgeon once on query"""
+"""
+Script to run gsurgeon once on query
+Author: Johannes Medagbe
+Copyright (c) 2026
+"""
 
 import argparse
 import asyncio
@@ -7,14 +11,7 @@ import os
 import dspy
 from Bio import Entrez
 from dotenv import load_dotenv
-
-from gsurgeon.agent import GSurgeon
-
-
-async def operate(query: str, n_iterations: int = 5) -> str:
-    surgeon = GSurgeon(max_iterations=n_iterations)
-    return await surgeon.handle(query)
-
+from gsurgeon.operations.standard import operate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
