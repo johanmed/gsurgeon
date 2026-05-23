@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Script to run gsurgeon once on query"""
 
 import argparse
 import asyncio
