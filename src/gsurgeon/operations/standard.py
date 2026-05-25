@@ -51,3 +51,19 @@ async def serialize(
     for query, result in zip(queries, results):
         collection[f"Query was '{query}'"] = f"Response was '{result}'."
     return collection
+
+
+async def meta_analyze(
+    query: str, n_iterations: int = 5, n_bootstraps: int = 5, n_samples: int = 10
+) -> list[str]:
+    """
+    Perform a meta-analysis of an operation or genomic task with n samples
+    Args:
+        query: genomic task
+        n_iterations: max number of iterations allowed during operation
+        n_boostraps: number of operation repetitions
+        n_samples: number of repetition sampling for statistical support
+    """
+    return await asyncio.gather(
+        *[reoperate(query, n_iterations, n_bootstraps) for n in range(n_samples)]
+    )
