@@ -12,14 +12,18 @@ import os
 import dspy
 from Bio import Entrez
 from dotenv import load_dotenv
-from gsurgeon.operations.standard import meta_analyze
 from gsurgeon.metrics.finemapping import bootstrap_rank as rank_genes
 from gsurgeon.metrics.network import bootstrap_rank as rank_edges
+from gsurgeon.operations.standard import meta_analyze
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", help="Type of genomic task to perform i.e finemapping or network")
-    parser.add_argument("--instruction-path", help="Path to file with detailed instructions")
+    parser.add_argument(
+        "--task", help="Type of genomic task to perform i.e finemapping or network"
+    )
+    parser.add_argument(
+        "--instruction-path", help="Path to file with detailed instructions"
+    )
     parser.add_argument("--env-file", default=".env", help="Path to .env file")
     args = parser.parse_args()
 
@@ -64,11 +68,13 @@ if __name__ == "__main__":
 
     task = args.task
     print(f"Running {task} task...")
-    
+
     with open(args.instruction_path) as i:
-        instruction = i.read()
-    results = asyncio.run(meta_analyze(instruction, n_iterations, n_bootstraps, n_samples))
-    
+        instruction = i.read().strip()
+    results = asyncio.run(
+        meta_analyze(instruction, n_iterations, n_bootstraps, n_samples)
+    )
+
     if task == "finemapping":
         output = rank_genes(intruction, results)
     elif task == "network":
@@ -77,5 +83,8 @@ if __name__ == "__main__":
         raise ValueError("Genomic task not supported")
     print("Task complete and metric estimated")
 
-    processed_output = {key[0]: f"\nRank: {key[1]}\nBootstrap support: {round(output[key]*100)}%" for key in output}
+    processed_output = {
+        key[0]: f"\nRank: {key[1]}\nBootstrap support: {round(output[key]*100)}%"
+        for key in output
+    }
     print(json.dumps(processed_output, indent=4))
