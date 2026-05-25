@@ -12,7 +12,7 @@ import os
 import dspy
 from Bio import Entrez
 from dotenv import load_dotenv
-from gsurgeon.operations.standard import reoperate
+from gsurgeon.operations.standard import serialize
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -55,18 +55,11 @@ if __name__ == "__main__":
         raise ValueError("Set N_BOOTSTRAPS for multiple runs")
     n_bootstraps = int(N_BOOTSTRAPS)
 
-    print("Running operation for a set of questions...")
+    print("Running operation for a set of queries...")
     with open(args.input_path) as i:
         data = i.read()
-        questions = data.split("\n")
-
-    collection = {}
-    for ind, question in enumerate(questions):
-        response = asyncio.run(reoperate(question, n_iterations, n_bootstraps))
-        collection[f"Question {ind} was '{question}'"] = (
-            f"Response {ind} was '{response}'."
-        )
-
+        queries = data.strip().split("\n")
+    collection = asyncio.run(serialize(queries, n_iterations, n_bootstraps))
     with open(args.output_path, "w") as o:
         o.write(json.dumps(collection, indent=4))
-    print("Run complete for all questions")
+    print("Run complete for all queries")
