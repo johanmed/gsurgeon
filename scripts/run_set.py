@@ -1,5 +1,5 @@
 """
-Script to run gsurgeon with bootstrap on all questions in a set
+Script to run gsurgeon with bootstrapping on all questions in a set
 Author: Johannes Medagbe
 Copyright (c) 2026
 """

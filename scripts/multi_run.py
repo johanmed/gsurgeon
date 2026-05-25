@@ -1,5 +1,5 @@
 """
-Script to run gsurgeon multiple times on same query and get reproducible results
+Script to run gsurgeon with bootstrapping on same query and get reproducible results
 Author: Johannes Medagbe
 Copyright (c) 2026
 """
