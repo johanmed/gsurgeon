@@ -1,0 +1,81 @@
+"""
+Script to run a genomic task with gsurgeon for metric estimation
+Author: Johannes Medagbe
+Copyright (c) 2026
+"""
+
+import argparse
+import asyncio
+import json
+import os
+
+import dspy
+from Bio import Entrez
+from dotenv import load_dotenv
+from gsurgeon.operations.standard import meta_analyze
+from gsurgeon.metrics.finemapping import bootstrap_rank as rank_genes
+from gsurgeon.metrics.network import bootstrap_rank as rank_edges
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--task", help="Type of genomic task to perform i.e finemapping or network")
+    parser.add_argument("--instruction-path", help="Path to file with detailed instructions")
+    parser.add_argument("--env-file", default=".env", help="Path to .env file")
+    args = parser.parse_args()
+
+    load_dotenv(dotenv_path=args.env_file)
+
+    EMAIL = os.getenv("EMAIL")
+    if EMAIL is None:
+        raise ValueError("Set EMAIL for NCBI tool calling")
+    Entrez.email = EMAIL
+
+    MODEL_NAME = os.getenv("MODEL_NAME")
+    if MODEL_NAME is None:
+        raise ValueError("Set MODEL_NAME of a provider")
+
+    API_KEY = os.getenv("API_KEY")
+    if API_KEY is None:
+        raise ValueError("Set valid API_KEY for proprietary model")
+    model = dspy.LM(
+        MODEL_NAME,
+        api_key=API_KEY,
+        max_tokens=10_000,
+        temperature=0,
+        verbose=False,
+    )
+
+    dspy.configure(lm=model)
+
+    N_ITERATIONS = os.getenv("N_ITERATIONS")
+    if N_ITERATIONS is None:
+        raise ValueError("Set N_ITERATIONS for operation")
+    n_iterations = int(N_ITERATIONS)
+
+    N_BOOTSTRAPS = os.getenv("N_BOOTSTRAPS")
+    if N_BOOTSTRAPS is None:
+        raise ValueError("Set N_BOOTSTRAPS for multiple operation runs")
+    n_bootstraps = int(N_BOOTSTRAPS)
+
+    N_SAMPLES = os.getenv("N_SAMPLES")
+    if N_SAMPLES is None:
+        raise ValueError("Set N_SAMPLES for multiple statistical runs")
+    n_samples = int(N_SAMPLES)
+
+    task = args.task
+    print(f"Running {task} task...")
+    
+    with open(args.instruction_path) as i:
+        instruction = i.read()
+    results = asyncio.run(meta_analyze(instruction, n_iterations, n_bootstraps, n_samples))
+    
+    if task == "finemapping":
+        output = rank_genes(intruction, results)
+    elif task == "network":
+        output = rank_edges(instruction, results)
+    else:
+        raise ValueError("Genomic task not supported")
+    print("Task complete and metric estimated")
+
+    processed_output = {key[0]: f"\nRank: {key[1]}\nBootstrap support: {round(output[key]*100)}%" for key in output}
+    print(json.dumps(processed_output, indent=4))

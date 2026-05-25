@@ -21,7 +21,7 @@ class ExtractGene(dspy.Signature):
     )
 
 
-def bootstrap_rank(query: str, answers: list[str]) -> dict:
+def bootstrap_rank(query: str, answers: list[str]) -> dict[tuple, float]:
     """Compute a bootstrap rank for each gene"""
     extract = dspy.Predict(ExtractGene)
     gene_ranks = extract(query=query, answers=answers).get("gene_ranks")

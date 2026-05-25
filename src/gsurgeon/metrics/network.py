@@ -21,8 +21,8 @@ class ExtractEdge(dspy.Signature):
     )
 
 
-def bootstrap_weight(query: str, answers: list[str]) -> dict:
-    """Compute a bootstrap weight for each edge"""
+def bootstrap_rank(query: str, answers: list[str]) -> dict[tuple, float]:
+    """Compute a bootstrap rank for each edge"""
     extract = dspy.Predict(ExtractEdge)
     edge_ranks = extract(query=query, answers=answers).get("edge_ranks")
     return bootstrap(edge_ranks)
