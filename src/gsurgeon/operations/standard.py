@@ -42,14 +42,25 @@ async def serialize(
         n_iterations: max number of iterations allowed during operation
         n_boostraps: number of operation repetitions
     Output:
-        Dictionary of query and response
+        Dictionary of query and responses
     """
-    results = await asyncio.gather(
+
+    base = dspy.ChainOfThought("query -> answer: str")
+    base_results = [base(query=query).get("answer") for query in queries]
+
+    surgeon_results = await asyncio.gather(
         *[reoperate(query, n_iterations, n_bootstraps) for query in queries]
     )
+
     collection = {}
-    for query, result in zip(queries, results):
-        collection[f"Query was '{query}'"] = f"Response was '{result}'."
+    for query, base_result, surgeon_result in zip(
+        queries, base_results, surgeon_results
+    ):
+        collection[f"Query was '{query}'"] = [
+            f"Base response was '{base_result}'",
+            f"Surgeon response was: '{surgeon_result}'",
+        ]
+
     return collection
 
 
