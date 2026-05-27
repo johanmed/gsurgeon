@@ -38,6 +38,7 @@ if __name__ == "__main__":
         api_key=API_KEY,
         max_tokens=10_000,
         temperature=0,
+        cache=False,
         verbose=False,
     )
 
