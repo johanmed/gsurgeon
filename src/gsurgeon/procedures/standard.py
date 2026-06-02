@@ -35,6 +35,7 @@ class Supervise(dspy.Signature):
     To select the next step, you must take into account the query and the curent context.
     If the query is not related to GeneNetwork traits, do not call gn_researcher. ncbi_expert should be the main actor.
     Similarly, do not call the ncbi_expert if the query is GeneNetwork specific.
+    When the query is related to genes, finemapping or network analysis, you must call the ncbi_expert and not the gn_researcher.
     Call the reflector only to improve generation from gn_researcher and ncbi_expert.
     Act on suggestions proposed by reflector using the most appropriate actor between gn_researcher and ncbi_expert depending on the query.
     End execution if there is nothing else to do.
