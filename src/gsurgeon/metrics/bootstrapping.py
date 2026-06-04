@@ -19,5 +19,6 @@ def bootstrap(element_ranks: dict[str, list]) -> dict[tuple, float]:
             Counter(sorted_ranks).items(), key=lambda item: item[1], reverse=True
         )[0]
         top_rank, frequency = top
-        bootstraps[(element, top_rank)] = frequency / total
+        bootstrap_ranks[(element, top_rank)] = frequency / total
+    bootstrap_ranks = dict(sorted(bootstrap_ranks.items(), key=lambda item: item[0][1]))
     return bootstrap_ranks
