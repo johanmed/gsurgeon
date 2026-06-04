@@ -77,7 +77,7 @@ if __name__ == "__main__":
     )
 
     if task == "finemapping":
-        output = rank_genes(intruction, results)
+        output = rank_genes(instruction, results)
     elif task == "network":
         output = rank_edges(instruction, results)
     else:
