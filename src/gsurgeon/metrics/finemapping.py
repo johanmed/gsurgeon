@@ -9,15 +9,14 @@ class ExtractGene(dspy.Signature):
     Construct a list of genes consistent across answers.
     Scan answers and extract rank for each gene in the previous list.
     Build a dictionary with gene as key and list of ranks as value.
-    Example: {"gene A": [1, 1, 2], "gene B": [2, 3, 2]}
     """
 
     query: str = dspy.InputField(desc="Finemapping query")
     answers: list[str] = dspy.InputField(
         desc="List of answers to the query, each reporting ranked list of genes"
     )
-    gene_ranks: dict[str, list] = dspy.OutputField(
-        desc="Dictionary of genes and assigned ranks"
+    gene_ranks: dict[str, list[int]] = dspy.OutputField(
+        desc="Dictionary of genes and assigned ranks. Example: {'gene A': [1, 1, 2], 'gene B': [2, 3, 2]}"
     )
 
 

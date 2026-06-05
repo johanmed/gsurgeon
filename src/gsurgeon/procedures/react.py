@@ -48,10 +48,12 @@ class Consult(dspy.Module):
     For effficiency, only call a tool when it is strictly necessary in completing the next task.
     Use splitter when input query is too complex to be handled in a single step.
     Harness the reformulator to clarify a request when it seems ambiguous.
-    Extract answers from NCBI by performing first a search with ncbi_searcher.
+    Extract answers from NCBI by performing first a search with ncbi_searcher. The search terms must be as specific as possible.
     When search results contain records, fetch information with record_fetcher.
     For records with a lot of data specifically, take some time to synthesize informations.
     Check relevance of generated information with the checker before proceeding.
+    Every information you extracted regarding genes and/or functions must be verified with another search using proper terms with ncbi_searcher.
+    You must ascertain that all informations in the final answer are true at all cost.
     For reproducibility, seed your reasoning on the following master thoughts:
         1. NCBI has the data requested by the user and it can be obtained by using a combination of terms with AND or OR keywords.
         2. Reasoning does not need to be complicated. Prefer the simplest approach.
@@ -71,7 +73,7 @@ class Consult(dspy.Module):
         self.react = dspy.ReAct(
             signature=ReactSig,
             tools=self.tools,
-            max_iters=10,
+            max_iters=20,
         )
 
     def forward(self, query: list[BaseMessage]):

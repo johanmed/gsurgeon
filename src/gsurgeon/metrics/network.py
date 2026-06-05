@@ -16,7 +16,7 @@ class ExtractEdge(dspy.Signature):
     answers: list[str] = dspy.InputField(
         desc="List of answers to the query, each reporting a ranked of list of connections between genes"
     )
-    edge_ranks: dict[str, list] = dspy.OutputField(
+    edge_ranks: dict[str, list[int]] = dspy.OutputField(
         desc="Dictionary of connections and assigned ranks assigned"
     )
 
