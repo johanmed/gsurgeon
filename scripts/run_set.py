@@ -38,7 +38,7 @@ if __name__ == "__main__":
     model = dspy.LM(
         MODEL_NAME,
         api_key=API_KEY,
-        max_tokens=10_000,
+        max_tokens=20_000,
         temperature=0,
         cache=False,
         verbose=False,

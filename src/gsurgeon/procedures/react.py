@@ -9,6 +9,7 @@ from langchain_core.messages import BaseMessage
 
 class ReactSig(dspy.Signature):
     query: list[BaseMessage] = dspy.InputField()
+    reasoning: str = dspy.OutputField(desc="Concise explanation of solution")
     solution: str = dspy.OutputField(
         desc="Final answer to the query in 2000 words max making use of all relevant information in accumulated context."
     )
@@ -17,7 +18,7 @@ class ReactSig(dspy.Signature):
 class Research(dspy.Module):
     """
     Address a query or plan to completion using GeneNetwork resources only.
-    For effficiency, only call a tool when it is strictly necessary in completing the next task.
+    For efficiency, only call a tool when it is strictly necessary in completing the next task.
     Use splitter when input query is too complex to be handled in a single step.
     Harness the reformulator to clarify a request when it seems ambiguous.
     To get a specific information, call the fetcher. It has access to data and can extract any information.
