@@ -1,5 +1,5 @@
 """
-Script to run gsurgeon with bootstrapping on all questions in a set
+Script to run gsurgeon with repetition on all questions in a set
 Author: Johannes Medagbe
 Copyright (c) 2026
 """
@@ -46,21 +46,21 @@ if __name__ == "__main__":
 
     dspy.configure(lm=model)
 
+    N_STEPS = os.getenv("N_STEPS")
+    if N_STEPS is None:
+        raise ValueError("Set N_STEPS for operation")
+    n_steps = int(N_STEPS)
+
     N_ITERATIONS = os.getenv("N_ITERATIONS")
     if N_ITERATIONS is None:
-        raise ValueError("Set N_ITERATIONS for operation")
+        raise ValueError("Set N_ITERATIONS for multiple runs")
     n_iterations = int(N_ITERATIONS)
-
-    N_BOOTSTRAPS = os.getenv("N_BOOTSTRAPS")
-    if N_BOOTSTRAPS is None:
-        raise ValueError("Set N_BOOTSTRAPS for multiple runs")
-    n_bootstraps = int(N_BOOTSTRAPS)
 
     print("Running operation for a set of queries...")
     with open(args.input_path) as i:
         data = i.read()
         queries = data.strip().split("\n")
-    collection = asyncio.run(serialize(queries, n_iterations, n_bootstraps))
+    collection = asyncio.run(serialize(queries, n_steps, n_iterations))
     with open(args.output_path, "w") as o:
         o.write(json.dumps(collection, indent=4))
     print("Run complete for all queries")

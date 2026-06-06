@@ -43,9 +43,9 @@ if __name__ == "__main__":
 
     dspy.configure(lm=model)
 
-    N_ITERATIONS = os.getenv("N_ITERATIONS")
-    if N_ITERATIONS is None:
-        raise ValueError("Set N_ITERATIONS for operation")
-    n_iterations = int(N_ITERATIONS)
+    N_STEPS = os.getenv("N_STEPS")
+    if N_STEPS is None:
+        raise ValueError("Set N_STEPS for operation")
+    n_steps = int(N_STEPS)
 
-    print(asyncio.run(operate(args.query, n_iterations)))
+    print(asyncio.run(operate(args.query, n_steps)))

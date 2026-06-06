@@ -44,13 +44,13 @@ class GSurgeon:
     """
     Represent Search Agent
     Input:
-        max_iterations: maximum number of iterations allowed
+        max_steps: maximum number of steps allowed
     Operations:
         Initialization of multi-agent graph
         Run of query through system
     """
 
-    max_iterations: int = 5
+    max_steps: int = 5
     _graph: Any = field(init=False)
 
     def __post_init__(self):
@@ -124,7 +124,7 @@ class GSurgeon:
             *state.messages,
             supervisor_prompt2,
         ]
-        if len(messages) > self.max_iterations:
+        if len(messages) > self.max_steps:
             return {"next_decision": "end"}
         result = await asyncio.to_thread(supervise, background=messages)
         print("Supervisor selected the next worker")

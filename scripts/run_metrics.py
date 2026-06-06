@@ -1,5 +1,5 @@
 """
-Script to run a genomic task with gsurgeon for metric estimation
+Script to run and bootstrap a genomic task with gsurgeon for metric estimation
 Author: Johannes Medagbe
 Copyright (c) 2026
 """
@@ -52,20 +52,20 @@ if __name__ == "__main__":
 
     dspy.configure(lm=model)
 
+    N_STEPS = os.getenv("N_STEPS")
+    if N_STEPS is None:
+        raise ValueError("Set N_STEPS for operation")
+    n_steps = int(N_STEPS)
+
     N_ITERATIONS = os.getenv("N_ITERATIONS")
     if N_ITERATIONS is None:
-        raise ValueError("Set N_ITERATIONS for operation")
+        raise ValueError("Set N_ITERATIONS for multiple operation runs")
     n_iterations = int(N_ITERATIONS)
 
     N_BOOTSTRAPS = os.getenv("N_BOOTSTRAPS")
     if N_BOOTSTRAPS is None:
-        raise ValueError("Set N_BOOTSTRAPS for multiple operation runs")
+        raise ValueError("Set N_BOOTSTRAPS for multiple statistical runs")
     n_bootstraps = int(N_BOOTSTRAPS)
-
-    N_SAMPLES = os.getenv("N_SAMPLES")
-    if N_SAMPLES is None:
-        raise ValueError("Set N_SAMPLES for multiple statistical runs")
-    n_samples = int(N_SAMPLES)
 
     task = args.task
     print(f"Running {task} task...")
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     with open(args.instruction_path) as i:
         instruction = i.read().strip()
     results = asyncio.run(
-        meta_analyze(instruction, n_iterations, n_bootstraps, n_samples)
+        meta_analyze(instruction, n_steps, n_iterations, n_bootstraps)
     )
 
     if task == "finemapping":

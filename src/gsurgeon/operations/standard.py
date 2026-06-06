@@ -7,25 +7,25 @@ from gsurgeon.procedures.standard import Reproduce
 from gsurgeon.surgeon.agent import GSurgeon
 
 
-async def operate(query: str, n_iterations: int = 5) -> str:
+async def operate(query: str, n_steps: int = 5) -> str:
     """Execute operation or analysis with GSurgeon"""
-    surgeon = GSurgeon(max_iterations=n_iterations)
+    surgeon = GSurgeon(max_steps=n_steps)
     return await surgeon.handle(query)
 
 
-async def reoperate(query: str, n_iterations: int = 5, n_bootstraps: int = 5) -> str:
+async def reoperate(query: str, n_steps: int = 5, n_iterations: int = 5) -> str:
     """
     Execute operation or analysis a given number of times for reproducibility
     Args:
         query: inquiry
-        n_iterations: max number of iterations allowed during operation
-        n_boostraps: number of operation repetitions
+        n_steps: max number of steps allowed during operation
+        n_iterations: number of operation repetitions
     Output:
         Consensus resulting from different runs
     """
-    print(f"Bootstrapping operation {n_bootstraps} times for query...")
+    print(f"Bootstrapping operation {n_iterations} times for query...")
     results = await asyncio.gather(
-        *[operate(query, n_iterations) for n in range(n_bootstraps)]
+        *[operate(query, n_steps) for n in range(n_iterations)]
     )
     reproduce = dspy.Predict(Reproduce)
     print("Bootstrapped run completed")
@@ -33,14 +33,14 @@ async def reoperate(query: str, n_iterations: int = 5, n_bootstraps: int = 5) ->
 
 
 async def serialize(
-    queries: list, n_iterations: int = 5, n_bootstraps: int = 5
+    queries: list, n_steps: int = 5, n_iterations: int = 5
 ) -> dict:
     """
     Execute operation a given number of times for a set/series of queries
     Args:
         queries: list of queries to investigate
-        n_iterations: max number of iterations allowed during operation
-        n_boostraps: number of operation repetitions
+        n_steps: max number of steps allowed during operation
+        n_iterations: number of operation repetitions
     Output:
         Dictionary of query and responses
     """
@@ -49,7 +49,7 @@ async def serialize(
     base_results = [base(query=query).get("answer") for query in queries]
 
     surgeon_results = await asyncio.gather(
-        *[reoperate(query, n_iterations, n_bootstraps) for query in queries]
+        *[reoperate(query, n_steps, n_iterations) for query in queries]
     )
 
     collection = {}
@@ -65,16 +65,16 @@ async def serialize(
 
 
 async def meta_analyze(
-    query: str, n_iterations: int = 5, n_bootstraps: int = 5, n_samples: int = 10
+    query: str, n_steps: int = 5, n_iterations: int = 5, n_bootstraps: int = 10
 ) -> list[str]:
     """
     Perform a meta-analysis of an operation or genomic task with n samples
     Args:
         query: genomic task
-        n_iterations: max number of iterations allowed during operation
-        n_boostraps: number of operation repetitions
-        n_samples: number of repetition sampling for statistical support
+        n_steps: max number of steps allowed during operation
+        n_iterations: number of operation repetitions
+        n_bootstraps: number of repetition sampling for statistical support
     """
     return await asyncio.gather(
-        *[reoperate(query, n_iterations, n_bootstraps) for n in range(n_samples)]
+        *[reoperate(query, n_steps, n_iterations) for n in range(n_bootstraps)]
     )
