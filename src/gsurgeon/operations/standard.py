@@ -3,7 +3,7 @@
 import asyncio
 
 import dspy
-from gsurgeon.procedures.standard import Reproduce
+from gsurgeon.procedures.standard import Reproduce, Resample
 from gsurgeon.surgeon.agent import GSurgeon
 
 
@@ -32,9 +32,7 @@ async def reoperate(query: str, n_steps: int = 5, n_iterations: int = 5) -> str:
     return reproduce(query=query, results=results).get("consensus")
 
 
-async def serialize(
-    queries: list, n_steps: int = 5, n_iterations: int = 5
-) -> dict:
+async def serialize(queries: list, n_steps: int = 5, n_iterations: int = 5) -> dict:
     """
     Execute operation a given number of times for a set/series of queries
     Args:
@@ -75,6 +73,8 @@ async def meta_analyze(
         n_iterations: number of operation repetitions
         n_bootstraps: number of repetition sampling for statistical support
     """
+    resample = dspy.Predict(Resample)
+    queries = [resample(query=query).get("reformulation") for n in range(n_bootstraps)]
     return await asyncio.gather(
-        *[reoperate(query, n_steps, n_iterations) for n in range(n_bootstraps)]
+        *[reoperate(query, n_steps, n_iterations) for query in queries]
     )

@@ -73,3 +73,16 @@ class Reproduce(dspy.Signature):
     consensus: str = dspy.OutputField(
         desc="Final output built from consistent answers across results"
     )
+
+
+class Resample(dspy.Signature):
+    """
+    Examine the query and reformulate it in a new way.
+    The reformulation should be a resampling with replacement of the original query which maintains the original meaning.
+    Make sure to not change the task at all cost.
+    """
+
+    query: str = dspy.InputField()
+    reformulation: str = dspy.OutputField(
+        desc="Reformulation of the query with roughly the same length and meaning but that uses new synonyms everywhere possible."
+    )
