@@ -78,11 +78,12 @@ class Reproduce(dspy.Signature):
 class Resample(dspy.Signature):
     """
     Examine the query and reformulate it in a new way.
-    The reformulation should be a resampling with replacement of the original query which maintains the original meaning.
-    Make sure to not change the task at all cost.
+    The reformulation should be a resampling with replacement of the original query and must have a similar meaning.
+    Feel free to make any modification you want on the instructions. The more you tweak the instructions, the better it is.
+    Use as many synonyms and paraphrasing as possible.
     """
 
     query: str = dspy.InputField()
     reformulation: str = dspy.OutputField(
-        desc="Reformulation of the query with roughly the same length and meaning but that uses new synonyms everywhere possible."
+        desc="Reformulated query"
     )
