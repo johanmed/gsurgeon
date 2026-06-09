@@ -23,12 +23,12 @@ async def reoperate(query: str, n_steps: int = 5, n_iterations: int = 5) -> str:
     Output:
         Consensus resulting from different runs
     """
-    print(f"Bootstrapping operation {n_iterations} times for query...")
+    print(f"Repeating operation {n_iterations} times for query...")
     results = await asyncio.gather(
         *[operate(query, n_steps) for n in range(n_iterations)]
     )
     reproduce = dspy.Predict(Reproduce)
-    print("Bootstrapped run completed")
+    print("Multiple run completed")
     return reproduce(query=query, results=results).get("consensus")
 
 
