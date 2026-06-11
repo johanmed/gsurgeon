@@ -58,7 +58,7 @@ class Consult(dspy.Module):
     For reproducibility, seed your reasoning on the following master thoughts:
         1. NCBI has the data requested by the user and it can be obtained by using a combination of terms with AND or OR keywords.
         2. Reasoning does not need to be complicated. Prefer the simplest approach.
-    For finemapping taks, always focus on the top 10 genes unless specified otherwise.
+    For finemapping taks, always focus on the top 20 genes unless specified otherwise.
     """
 
     def __init__(self):
