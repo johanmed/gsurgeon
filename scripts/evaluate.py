@@ -1,5 +1,5 @@
 """
-Script to run gsurgeon with repetition on all questions in a set
+Script to run gsurgeon and base LLM on query for comparison
 Author: Johannes Medagbe
 Copyright (c) 2026
 """
