@@ -68,7 +68,7 @@ if __name__ == "__main__":
     n_bootstraps = int(N_BOOTSTRAPS)
 
     task = args.task
-    print(f"Running {task} task...")
+    print(f"Estimating metrics for {task} task...")
 
     with open(args.instruction_path) as i:
         instruction = i.read().strip()
