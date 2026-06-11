@@ -3,7 +3,7 @@
 from collections import Counter
 
 
-def bootstrap(element_ranks: dict[str, list[int]]) -> dict[tuple, float]:
+def bootstrap(element_ranks: dict[str, list[int]]) -> dict[tuple[str, int], tuple[float, int]]:
     """
     Compute bootstrap rank for each element
     Args:
@@ -19,6 +19,6 @@ def bootstrap(element_ranks: dict[str, list[int]]) -> dict[tuple, float]:
             Counter(sorted_ranks).items(), key=lambda item: item[1], reverse=True
         )[0]
         top_rank, frequency = top
-        bootstrap_ranks[(element, top_rank)] = frequency / total
+        bootstrap_ranks[(element, top_rank)] = (frequency / total, total)
     bootstrap_ranks = dict(sorted(bootstrap_ranks.items(), key=lambda item: item[0][1]))
     return bootstrap_ranks

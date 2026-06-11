@@ -85,7 +85,7 @@ if __name__ == "__main__":
     print("Task complete and metric estimated")
 
     processed_output = {
-        key[0]: f"Rank = {key[1]} Bootstrap support = {round(output[key]*100)}%"
+        key[0]: f"Rank = {key[1]}, Bootstrap support = {round(output[key][0]*100)}%, Size = {output[key][1]}"
         for key in output
     }
     print(json.dumps(processed_output, indent=4))
