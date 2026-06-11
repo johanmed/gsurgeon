@@ -12,7 +12,7 @@ import os
 import dspy
 from Bio import Entrez
 from dotenv import load_dotenv
-from gsurgeon.operations.standard import serialize
+from gsurgeon.operations.standard import evaluate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -56,11 +56,10 @@ if __name__ == "__main__":
         raise ValueError("Set N_ITERATIONS for multiple runs")
     n_iterations = int(N_ITERATIONS)
 
-    print("Running operation for a set of queries...")
+    print("Contrasting base and surgeon results...")
     with open(args.input_path) as i:
-        data = i.read()
-        queries = data.strip().split("\n")
-    collection = asyncio.run(serialize(queries, n_steps, n_iterations))
+        query = i.read().strip()
+    collection = asyncio.run(evaluate(query, n_steps, n_iterations))
     with open(args.output_path, "w") as o:
         o.write(json.dumps(collection, indent=4))
-    print("Run complete for all queries")
+    print("Comparison performed")

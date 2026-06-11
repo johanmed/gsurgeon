@@ -32,9 +32,10 @@ async def reoperate(query: str, n_steps: int = 5, n_iterations: int = 5) -> str:
     return reproduce(query=query, results=results).get("consensus")
 
 
-async def serialize(queries: list, n_steps: int = 5, n_iterations: int = 5) -> dict:
+async def evaluate(query: str, n_steps: int = 5, n_iterations: int = 5) -> list:
     """
-    Execute operation a given number of times for a set/series of queries
+    Execute operation a given number of times for a query with surgeon
+    and compare with base LLM
     Args:
         queries: list of queries to investigate
         n_steps: max number of steps allowed during operation
@@ -44,22 +45,13 @@ async def serialize(queries: list, n_steps: int = 5, n_iterations: int = 5) -> d
     """
 
     base = dspy.ChainOfThought("query -> answer: str")
-    base_results = [base(query=query).get("answer") for query in queries]
-
-    surgeon_results = await asyncio.gather(
-        *[reoperate(query, n_steps, n_iterations) for query in queries]
-    )
-
-    collection = {}
-    for query, base_result, surgeon_result in zip(
-        queries, base_results, surgeon_results
-    ):
-        collection[f"Query was '{query}'"] = [
-            f"Base response was '{base_result}'",
-            f"Surgeon response was: '{surgeon_result}'",
-        ]
-
-    return collection
+    base_results = base(query=query).get("answer")
+    surgeon_results = await reoperate(query, n_steps, n_iterations)
+    return [
+        f"Query was '{query}'",
+        f"Base response was '{base_results}'",
+        f"Surgeon response was: '{surgeon_results}'",
+    ]
 
 
 async def meta_analyze(
