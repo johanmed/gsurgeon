@@ -3,7 +3,9 @@
 from collections import Counter
 
 
-def bootstrap(element_ranks: dict[str, list[int]]) -> dict[tuple[str, int], tuple[float, int]]:
+def bootstrap(
+    element_ranks: dict[str, list[int]]
+) -> dict[tuple[str, int], tuple[float, int]]:
     """
     Compute bootstrap rank for each element
     Args:

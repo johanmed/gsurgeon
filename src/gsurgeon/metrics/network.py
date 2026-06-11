@@ -1,6 +1,7 @@
 """Module with constructs to compute metrics for network analysis"""
 
 import dspy
+
 from gsurgeon.metrics.bootstrapping import bootstrap
 
 
@@ -21,7 +22,9 @@ class ExtractEdge(dspy.Signature):
     )
 
 
-def bootstrap_rank(query: str, answers: list[str]) -> dict[tuple, float]:
+def bootstrap_rank(
+    query: str, answers: list[str]
+) -> dict[tuple[str, int], tuple[float, int]]:
     """Compute a bootstrap rank for each edge"""
     extract = dspy.Predict(ExtractEdge)
     edge_ranks = extract(query=query, answers=answers).get("edge_ranks")
