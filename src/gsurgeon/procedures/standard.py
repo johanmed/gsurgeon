@@ -65,12 +65,12 @@ class Reproduce(dspy.Signature):
     Do not include information that is missing in some results for reproducibility.
     Synthesize a coherent and detailed solution to the query using answer consensus.
     If the task is:
-    1. FINEMAPPING:
-        Scan all answers for genes identified on chromosome 1 with corresponding ranks, before moving to chromosome 2 and so on.
-        Identify consistent genes with their ranks for each chromosome.
-        Proceed to synthesis by chromosome.
-        Report consistent genes with corresponding ranks chromosome by chromosome.
-        Be extremely thorough to not mix answers between chromosomes.
+    A. FINEMAPPING:
+        Scan all answers for genes identified on a specific chromosome, before moving to the next one.
+        Identify consistent genes with their ranks for a specific chromosome before moving to the next one.
+        Report consistent genes with corresponding ranks across results chromosome by chromosome.
+        Remember the user expects a ranked list of genes (1 to 20) per chromosome.
+        Be extremely thorough to not mix answers on different chromosomes.
     """
 
     query: str = dspy.InputField()
