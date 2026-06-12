@@ -45,7 +45,6 @@ if __name__ == "__main__":
         MODEL_NAME,
         api_key=API_KEY,
         max_tokens=100_000,
-        effort="xhigh",
         temperature=1,
         cache=False,
         verbose=False,
