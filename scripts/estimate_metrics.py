@@ -45,6 +45,7 @@ if __name__ == "__main__":
         MODEL_NAME,
         api_key=API_KEY,
         max_tokens=100_000,
+        effort="xhigh",
         temperature=1,
         cache=False,
         verbose=False,
@@ -85,7 +86,9 @@ if __name__ == "__main__":
     print("Task complete and metric estimated")
 
     processed_output = {
-        key[0]: f"Rank = {key[1]}, Bootstrap support = {round(output[key][0]*100)}%, Size = {output[key][1]}"
+        key[
+            0
+        ]: f"Rank = {key[1]}, Bootstrap support = {round(output[key][0]*100)}%, Size = {output[key][1]}"
         for key in output
     }
     print(json.dumps(processed_output, indent=4))
