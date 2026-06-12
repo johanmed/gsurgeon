@@ -64,9 +64,13 @@ class Reproduce(dspy.Signature):
     Extract answers that are consistent across results.
     Do not include information that is missing in some results for reproducibility.
     Synthesize a coherent and detailed solution to the query using answer consensus.
-    If the task is finemapping, you must maintain the organization by chromosome.
-    In other words, consistent genes with corresponding ranks across results are expected chromosome by chromosome.
-    Be extremely thorough to not make mistakes or forget something.
+    If the task is:
+    1. FINEMAPPING:
+        Scan all answers for genes identified on chromosome 1 with corresponding ranks, before moving to chromosome 2 and so on.
+        Identify consistent genes with their ranks for each chromosome.
+        Proceed to synthesis by chromosome.
+        Report consistent genes with corresponding ranks chromosome by chromosome.
+        Be extremely thorough to not mix answers between chromosomes.
     """
 
     query: str = dspy.InputField()
