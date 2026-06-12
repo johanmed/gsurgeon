@@ -16,8 +16,10 @@ from gsurgeon.operations.standard import evaluate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-path", help="Path to file with set of questions")
-    parser.add_argument("--output-path", help="Path to output file")
+    parser.add_argument("--input-path", help="Path to file with query")
+    parser.add_argument(
+        "--output-path", help="Path to output file for evaluation results"
+    )
     parser.add_argument("--env-file", default=".env", help="Path to .env file")
     args = parser.parse_args()
 

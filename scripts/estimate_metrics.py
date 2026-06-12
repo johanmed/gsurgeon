@@ -21,8 +21,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--task", help="Type of genomic task to perform i.e finemapping or network"
     )
+    parser.add_argument("--input-path", help="Path to file with detailed instructions")
     parser.add_argument(
-        "--instruction-path", help="Path to file with detailed instructions"
+        "--output-path", help="Path to output file with metrics estimated"
     )
     parser.add_argument("--env-file", default=".env", help="Path to .env file")
     args = parser.parse_args()
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     task = args.task
     print(f"Estimating metrics for {task} task...")
 
-    with open(args.instruction_path) as i:
+    with open(args.input_path) as i:
         instruction = i.read().strip()
     results = asyncio.run(
         meta_analyze(instruction, n_steps, n_iterations, n_bootstraps)
@@ -90,4 +91,5 @@ if __name__ == "__main__":
         ]: f"Rank = {key[1]}, Bootstrap support = {round(output[key][0]*100)}%, Size = {output[key][1]}"
         for key in output
     }
-    print(json.dumps(processed_output, indent=4))
+    with open(args.output_path, "w") as o:
+        o.write(json.dumps(processed_output, indent=4))
