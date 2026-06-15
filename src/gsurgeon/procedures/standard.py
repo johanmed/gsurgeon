@@ -73,7 +73,7 @@ class Reproduce(dspy.Signature):
         Be extremely thorough to not mix genes on different chromosomes.
     B. NETWORK ANALYSIS OF GENE LIST:
         Identify consistent connections between gene pairs and their corresponding ranks.
-        Remember the user expects a ranked list of gene connections.
+        Remember the user expects a weighted list of gene connections.
         Be extremely thorough to not mix genes in different pairs.
     """
 

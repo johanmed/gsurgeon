@@ -13,7 +13,7 @@ import dspy
 from Bio import Entrez
 from dotenv import load_dotenv
 from gsurgeon.metrics.finemapping import bootstrap_rank as rank_genes
-from gsurgeon.metrics.network import bootstrap_rank as rank_edges
+from gsurgeon.metrics.network import bootstrap_weight as weigh_edges
 from gsurgeon.operations.standard import meta_analyze
 
 if __name__ == "__main__":
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     if task == "finemapping":
         output = rank_genes(instruction, results)
     elif task == "network":
-        output = rank_edges(instruction, results)
+        output = weigh_edges(instruction, results)
     else:
         raise ValueError("Genomic task not supported")
     print("Task complete and metric estimated")
