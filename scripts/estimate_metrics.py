@@ -78,8 +78,10 @@ if __name__ == "__main__":
     )
 
     if task == "finemapping":
+        metric = "Rank"
         output = rank_genes(instruction, results)
     elif task == "network":
+        metric = "Weight"
         output = weigh_edges(instruction, results)
     else:
         raise ValueError("Genomic task not supported")
@@ -88,7 +90,7 @@ if __name__ == "__main__":
     processed_output = {
         key[
             0
-        ]: f"Rank = {key[1]}, Bootstrap support = {round(output[key][0]*100)}%, Size = {output[key][1]}"
+        ]: f"{metric} = {key[1]}, Bootstrap support = {round(output[key][0]*100)}%, Size = {output[key][1]}"
         for key in output
     }
     with open(args.output_path, "w") as o:
