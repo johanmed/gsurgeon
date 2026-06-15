@@ -71,6 +71,10 @@ class Reproduce(dspy.Signature):
         Report consistent genes with corresponding ranks across results chromosome by chromosome.
         Remember the user expects a ranked list of genes (1 to 20) per chromosome.
         Be extremely thorough to not mix genes on different chromosomes.
+    B. NETWORK ANALYSIS OF GENE LIST:
+        Identify consistent connections between gene pairs and their corresponding ranks.
+        Remember the user expects a ranked list of gene connections.
+        Be extremely thorough to not mix genes in different pairs.
     """
 
     query: str = dspy.InputField()
