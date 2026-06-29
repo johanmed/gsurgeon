@@ -25,7 +25,29 @@ You can clone this repository.
 git clone https://github.com/johanmed/gsurgeon.git
 ```
 
-#### 2. Set tool parameters
+#### 2. Install dependencies
+
+You can install dependencies for this project using:
+
+```
+poetry install
+```
+
+Poetry needs to already be installed in your machine for the command above to run. See [Poetry installation guide](https://python-poetry.org/docs/).
+
+Alternatively, you can create a Python virtual environment and install the dependencies in `pyproject.toml` one by one in it.
+
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip install "langchain-core>=1.4.0,<2.0.0"
+pip install "langgraph>=1.2.0,<2.0.0"
+...
+```
+
+This is a fallback in case you experience challenges getting started with poetry. It takes more work, so we recommend using poetry which manages everything automatically.
+
+#### 3. Set tool parameters
 
 **GSurgeon** expects a number of parameters to be defined for the surgery:
 
@@ -36,7 +58,7 @@ git clone https://github.com/johanmed/gsurgeon.git
 
 We recommend creating them in an environment file. For more details, see file `env_example`.
 
-#### 3. Add gsurgeon path to your search path
+#### 4. Add gsurgeon path to your search path
 
 ```bash
 export PATH="$PATH:/path/to/project"
@@ -44,7 +66,7 @@ export PATH="$PATH:/path/to/project"
 
 Replace the path above by yours. You can also add it to your file `~/.bashrc`.
 
-#### 4. Run your query
+#### 5. Run your query
 
 ```bash
 gsurgeon --env-file env_example "Which genes on chromosome 1 of the mouse genome are related to inflammation and diabetes at the same time?"
